@@ -22,7 +22,7 @@ class TestHyperparameterConfiguration(unittest.TestCase):
             values={
                 "X1": 0.2,
                 "X2": False,
-                "X3": 2,
+                "X3": 3,
                 "X4": "attribute1",
                 "X5": -1.2,
             },
