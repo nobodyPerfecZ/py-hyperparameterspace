@@ -1,5 +1,6 @@
 from typing import Union, Iterable, Any
 import numpy as np
+import torch
 
 from PyHyperparameterSpace.dist.abstract_dist import Distribution
 from PyHyperparameterSpace.hp.abstract_hp import Hyperparameter
@@ -58,6 +59,8 @@ class Constant(Hyperparameter):
                 return (1,)
             elif isinstance(self._default, np.ndarray):
                 return self._default.shape
+            elif isinstance(self._default, torch.Tensor):
+                return tuple(self._default.size())
         elif self._is_legal_shape(shape):
             return shape
         else:
@@ -72,9 +75,13 @@ class Constant(Hyperparameter):
             # Check if shape has the right format for the default value
             if isinstance(self._default, np.ndarray) and shape == len(self._default):
                 return True
+            elif isinstance(self._default, torch.Tensor) and shape == len(self._default):
+                return True
         elif isinstance(shape, tuple) and all(isinstance(s, int) for s in shape):
             # Check if shape is in the right format for the default value
             if isinstance(self._default, np.ndarray) and shape == self._default.shape:
+                return True
+            elif isinstance(self._default, torch.Tensor) and shape == self._default.size():
                 return True
         return False
 
@@ -94,6 +101,8 @@ class Constant(Hyperparameter):
         sample_size = Constant._get_sample_size(size=size, shape=self._shape)
         if sample_size is None or sample_size == 1:
             return self._default
+        elif isinstance(self._default, torch.Tensor):
+            return torch.stack([self._default] * size, dim=0)
         else:
             return np.full(shape=sample_size, fill_value=self._default)
 

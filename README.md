@@ -85,6 +85,7 @@ from PyHyperparameterSpace.hp.continuous import Float, Integer
 from PyHyperparameterSpace.hp.categorical import Categorical
 from PyHyperparameterSpace.hp.constant import Constant
 from PyHyperparameterSpace.dist.continuous import Uniform
+import numpy as np
 
 cs = HyperparameterConfigurationSpace(
     values={
