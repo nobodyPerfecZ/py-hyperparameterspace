@@ -20,7 +20,7 @@ class Constant(Hyperparameter):
             self,
             name: str,
             default: Any,
-            shape: Union[int, tuple[int, ...], None] = (1,),
+            shape: Union[int, tuple[int, ...], None] = None,
     ):
         super().__init__(name=name, shape=shape, bounds=None, choices=None, default=default, distribution=None,
                          weights=None)
@@ -52,13 +52,19 @@ class Constant(Hyperparameter):
         return True
 
     def _check_shape(self, shape: Union[int, tuple[int, ...], None]) -> Union[int, tuple[int, ...], None]:
+        if shape is None:
+            # Case: Adjust the shape according to the given default value
+            if isinstance(self._default, (int, float, bool, str)):
+                return (1,)
+            elif isinstance(self._default, np.ndarray):
+                return self._default.shape
         if self._is_legal_shape(shape):
             return shape
         else:
             raise Exception(f"Illegal shape {shape}!")
 
-    def _is_legal_shape(self, shape: tuple[int]) -> bool:
-        if shape is None or shape == 1 or shape == (1,):
+    def _is_legal_shape(self, shape: Union[int, tuple[int, ...]]) -> bool:
+        if shape == 1 or shape == (1,):
             # Check if shape has the right format for the default value
             if isinstance(self._default, (int, float, bool, str)):
                 return True
