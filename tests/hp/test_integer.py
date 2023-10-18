@@ -27,6 +27,8 @@ class TestInteger(unittest.TestCase):
         self.hp2 = Integer(name=self.name, bounds=self.bounds, default=self.default2, shape=self.shape2)
         # Tests with default=None
         self.hp3 = Integer(name=self.name, bounds=self.bounds, default=None, shape=self.shape2)
+        # Test with shape=None
+        self.hp4 = Integer(name=self.name, bounds=self.bounds, default=self.default2, shape=None)
 
     def test_name(self):
         """
@@ -35,6 +37,7 @@ class TestInteger(unittest.TestCase):
         self.assertEqual(self.name, self.hp._name)
         self.assertEqual(self.name, self.hp2._name)
         self.assertEqual(self.name, self.hp3._name)
+        self.assertEqual(self.name, self.hp4._name)
 
     def test_shape(self):
         """
@@ -43,6 +46,7 @@ class TestInteger(unittest.TestCase):
         self.assertEqual(self.shape, self.hp._shape)
         self.assertEqual(self.shape2, self.hp2._shape)
         self.assertEqual(self.shape2, self.hp3._shape)
+        self.assertEqual(self.shape2, self.hp4._shape)
 
     def test_bounds(self):
         """
@@ -51,6 +55,7 @@ class TestInteger(unittest.TestCase):
         self.assertEqual(self.bounds, self.hp._bounds)
         self.assertEqual(self.bounds, self.hp2._bounds)
         self.assertEqual(self.bounds, self.hp3._bounds)
+        self.assertEqual(self.bounds, self.hp4._bounds)
 
     def test_choices(self):
         """
@@ -59,6 +64,7 @@ class TestInteger(unittest.TestCase):
         self.assertIsNone(self.hp._choices)
         self.assertIsNone(self.hp2._choices)
         self.assertIsNone(self.hp3._choices)
+        self.assertIsNone(self.hp4._choices)
 
     def test_default(self):
         """
@@ -67,6 +73,7 @@ class TestInteger(unittest.TestCase):
         self.assertEqual(self.default, self.hp._default)
         self.assertTrue(np.all(self.default2 == self.hp2._default))
         self.assertTrue(np.all(self.default3 == self.hp3._default))
+        self.assertTrue(np.all(self.default2 == self.hp4._default))
 
     def test_distribution(self):
         """
@@ -75,6 +82,7 @@ class TestInteger(unittest.TestCase):
         self.assertIsInstance(self.hp._distribution, Uniform)
         self.assertIsInstance(self.hp2._distribution, Uniform)
         self.assertIsInstance(self.hp3._distribution, Uniform)
+        self.assertIsInstance(self.hp4._distribution, Uniform)
 
     def test_weights(self):
         """
@@ -83,6 +91,7 @@ class TestInteger(unittest.TestCase):
         self.assertIsNone(self.hp._weights)
         self.assertIsNone(self.hp2._weights)
         self.assertIsNone(self.hp3._weights)
+        self.assertIsNone(self.hp4._weights)
 
     def test_lb(self):
         """
@@ -91,6 +100,7 @@ class TestInteger(unittest.TestCase):
         self.assertEqual(self.bounds[0], self.hp._lb)
         self.assertEqual(self.bounds[0], self.hp2._lb)
         self.assertEqual(self.bounds[0], self.hp3._lb)
+        self.assertEqual(self.bounds[0], self.hp4._lb)
 
     def test_ub(self):
         """
@@ -99,6 +109,7 @@ class TestInteger(unittest.TestCase):
         self.assertEqual(self.bounds[1], self.hp._ub)
         self.assertEqual(self.bounds[1], self.hp2._ub)
         self.assertEqual(self.bounds[1], self.hp3._ub)
+        self.assertEqual(self.bounds[1], self.hp4._ub)
 
     def test_get_name(self):
         """
@@ -107,6 +118,7 @@ class TestInteger(unittest.TestCase):
         self.assertEqual(self.name, self.hp.get_name())
         self.assertEqual(self.name, self.hp2.get_name())
         self.assertEqual(self.name, self.hp3.get_name())
+        self.assertEqual(self.name, self.hp4.get_name())
 
     def test_get_default(self):
         """
@@ -115,6 +127,7 @@ class TestInteger(unittest.TestCase):
         self.assertEqual(self.default, self.hp.get_default())
         self.assertTrue(np.all(self.default2 == self.hp2.get_default()))
         self.assertTrue(np.all(self.default3 == self.hp3.get_default()))
+        self.assertTrue(np.all(self.default2 == self.hp4.get_default()))
 
     def test_get_shape(self):
         """
@@ -123,6 +136,7 @@ class TestInteger(unittest.TestCase):
         self.assertEqual(self.shape, self.hp.get_shape())
         self.assertEqual(self.shape2, self.hp2.get_shape())
         self.assertEqual(self.shape2, self.hp3.get_shape())
+        self.assertEqual(self.shape2, self.hp4.get_shape())
 
     def test_sample(self):
         """
@@ -142,6 +156,11 @@ class TestInteger(unittest.TestCase):
         self.assertEqual(self.shape2, sample3[0].shape)
         self.assertTrue(np.all((self.bounds[0] <= sample3) & (sample3 < self.bounds[1])))
 
+        sample4 = self.hp4.sample(random=self.random, size=self.size)
+        self.assertEqual(self.size, len(sample4))
+        self.assertEqual(self.shape2, sample4[0].shape)
+        self.assertTrue(np.all((self.bounds[0] <= sample4) & (sample4 < self.bounds[1])))
+
     def test_eq(self):
         """
         Tests the magic function __eq__.
@@ -149,6 +168,7 @@ class TestInteger(unittest.TestCase):
         self.assertEqual(self.hp, self.hp)
         self.assertNotEqual(self.hp, self.hp2)
         self.assertNotEqual(self.hp, self.hp3)
+        self.assertNotEqual(self.hp, self.hp4)
 
     def test_hash(self):
         """
@@ -157,6 +177,7 @@ class TestInteger(unittest.TestCase):
         self.assertEqual(hash(self.hp), hash(self.hp))
         self.assertNotEqual(hash(self.hp), hash(self.hp2))
         self.assertNotEqual(hash(self.hp), hash(self.hp3))
+        self.assertNotEqual(hash(self.hp), hash(self.hp4))
 
 
 if __name__ == '__main__':

@@ -24,7 +24,7 @@ class Float(Hyperparameter):
             name: str,
             bounds: Union[tuple[float, float], tuple[int, int]],
             default: Union[int, float, np.ndarray] = None,
-            shape: Union[int, tuple[int, ...], None] = (1,),
+            shape: Union[int, tuple[int, ...], None] = None,
             distribution: Distribution = Uniform(),
     ):
         super().__init__(name=name, shape=shape, bounds=bounds, choices=None, default=default,
@@ -79,14 +79,20 @@ class Float(Hyperparameter):
             # Case: Default is a float/int matrix
             return np.all((default >= self._lb) & (default <= self._ub))
 
-    def _check_shape(self, shape: Union[int, tuple[int, ...], None]) -> Union[int, tuple[int, ...], None]:
-        if self._is_legal_shape(shape):
+    def _check_shape(self, shape: Union[int, tuple[int, ...]]) -> Union[int, tuple[int, ...]]:
+        if shape is None:
+            # Case: Adjust the shape according to the given default value
+            if self._default is None or isinstance(self._default, (float, int)):
+                return (1,)
+            elif isinstance(self._default, np.ndarray):
+                return self._default.shape
+        elif self._is_legal_shape(shape):
             return shape
         else:
             raise Exception(f"Illegal shape {shape}!")
 
-    def _is_legal_shape(self, shape: Union[int, tuple[int, ...], None]) -> bool:
-        if shape is None or shape == 1 or shape == (1,):
+    def _is_legal_shape(self, shape: Union[int, tuple[int, ...]]) -> bool:
+        if shape == 1 or shape == (1,):
             # Check if shape has the right format for the default value
             if isinstance(self._default, (float, int)):
                 return True
@@ -179,7 +185,7 @@ class Integer(Hyperparameter):
             name: str,
             bounds: Union[tuple[int, int], None],
             default: Union[int, np.ndarray] = None,
-            shape: Union[int, tuple[int, ...], None] = (1,),
+            shape: Union[int, tuple[int, ...], None] = None,
     ):
         super().__init__(name=name, shape=shape, bounds=bounds, choices=None, default=default, distribution=Uniform(),
                          weights=None)
@@ -231,14 +237,20 @@ class Integer(Hyperparameter):
             # Case: Default is a float/int matrix
             return np.all((default >= self._lb) & (default <= self._ub))
 
-    def _check_shape(self, shape: Union[int, tuple[int, ...], None]) -> Union[int, tuple[int, ...], None]:
-        if self._is_legal_shape(shape):
+    def _check_shape(self, shape: Union[int, tuple[int, ...]]) -> Union[int, tuple[int, ...]]:
+        if shape is None:
+            # Case: Adjust the shape according to the given default value
+            if self._default is None or isinstance(self._default, int):
+                return (1,)
+            elif isinstance(self._default, np.ndarray):
+                return self._default.shape
+        elif self._is_legal_shape(shape):
             return shape
         else:
             raise Exception(f"Illegal shape {shape}!")
 
-    def _is_legal_shape(self, shape: Union[int, tuple[int, ...], None]) -> bool:
-        if shape is None or shape == 1 or shape == (1,):
+    def _is_legal_shape(self, shape: Union[int, tuple[int, ...]]) -> bool:
+        if shape == 1 or shape == (1,):
             # Check if shape has the right format for the default value
             if isinstance(self._default, int):
                 return True

@@ -88,7 +88,7 @@ from PyHyperparameterSpace.dist.continuous import Uniform
 
 cs = HyperparameterConfigurationSpace(
     values={
-        "weights1": Float("weights1", bounds=(-1.0, 1.0), default=np.array([[0.0, 0.1], [0.2, 0.3]]) ,distribution=Uniform()),
+        "weights1": Float("weights1", bounds=(-1.0, 1.0), default=np.array([[0.0, 0.1], [0.2, 0.3]]), distribution=Uniform()),
         "weights2": Integer("weights2", bounds=(1, 6), default=np.array([[1, 2], [3, 4]])),
         "weights3": Constant("weights3", default=np.array([[True, False], [True, True]])),
     }
@@ -98,7 +98,7 @@ cs = HyperparameterConfigurationSpace(
 ### Future Features
 The following list defines features, that are currently on work:
 
-- Add Constraints to HyperparameterConfigurationSpace to also add Hierarchical Hyperparameters
-- Adjust Binary() and Categorical() to also use values that are matrices instead of single values
-- Add support for torch.Tensor to all types of Hyperparameters
-- Dynamically adjust shape=... parameter, given to the default value
+* [ ] Add Constraints to HyperparameterConfigurationSpace to also add Hierarchical Hyperparameters
+* [ ] Adjust Binary() and Categorical() to also use values that are matrices instead of single values
+* [ ] Add support for torch.Tensor to all types of Hyperparameters
+* [x] Dynamically adjust shape=... parameter, given to the default value

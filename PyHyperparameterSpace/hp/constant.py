@@ -51,14 +51,14 @@ class Constant(Hyperparameter):
             return False
         return True
 
-    def _check_shape(self, shape: Union[int, tuple[int, ...], None]) -> Union[int, tuple[int, ...], None]:
+    def _check_shape(self, shape: Union[int, tuple[int, ...], None]) -> Union[int, tuple[int, ...]]:
         if shape is None:
             # Case: Adjust the shape according to the given default value
             if isinstance(self._default, (int, float, bool, str)):
                 return (1,)
             elif isinstance(self._default, np.ndarray):
                 return self._default.shape
-        if self._is_legal_shape(shape):
+        elif self._is_legal_shape(shape):
             return shape
         else:
             raise Exception(f"Illegal shape {shape}!")

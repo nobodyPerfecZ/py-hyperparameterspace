@@ -33,6 +33,9 @@ class TestFloat(unittest.TestCase):
         # Tests with default=None
         self.normal_hp3 = Float(name=self.name, shape=self.shape2, bounds=self.bounds, default=None,
                                 distribution=self.normal_distribution)
+        # Test with shape=None
+        self.normal_hp4 = Float(name=self.name, shape=None, bounds=self.bounds, default=self.default2,
+                                distribution=self.normal_distribution)
         # Tests with all options given
         self.uniform_hp = Float(name=self.name, shape=self.shape, bounds=self.bounds, default=self.default,
                                 distribution=self.uniform_distribution)
@@ -42,6 +45,9 @@ class TestFloat(unittest.TestCase):
         # Tests with default=None
         self.uniform_hp3 = Float(name=self.name, shape=self.shape2, bounds=self.bounds, default=None,
                                  distribution=self.uniform_distribution)
+        # Tests with shape=None
+        self.uniform_hp4 = Float(name=self.name, shape=None, bounds=self.bounds, default=self.default2,
+                                 distribution=self.uniform_distribution)
 
     def test_name(self):
         """
@@ -50,9 +56,11 @@ class TestFloat(unittest.TestCase):
         self.assertEqual(self.name, self.normal_hp._name)
         self.assertEqual(self.name, self.normal_hp2._name)
         self.assertEqual(self.name, self.normal_hp3._name)
+        self.assertEqual(self.name, self.normal_hp4._name)
         self.assertEqual(self.name, self.uniform_hp._name)
         self.assertEqual(self.name, self.uniform_hp2._name)
         self.assertEqual(self.name, self.uniform_hp3._name)
+        self.assertEqual(self.name, self.uniform_hp4._name)
 
     def test_shape(self):
         """
@@ -61,9 +69,11 @@ class TestFloat(unittest.TestCase):
         self.assertEqual(self.shape, self.normal_hp._shape)
         self.assertEqual(self.shape2, self.normal_hp2._shape)
         self.assertEqual(self.shape2, self.normal_hp3._shape)
+        self.assertEqual(self.shape2, self.normal_hp4._shape)
         self.assertEqual(self.shape, self.uniform_hp._shape)
         self.assertEqual(self.shape2, self.uniform_hp2._shape)
         self.assertEqual(self.shape2, self.uniform_hp3._shape)
+        self.assertEqual(self.shape2, self.uniform_hp4._shape)
 
     def test_bounds(self):
         """
@@ -72,9 +82,11 @@ class TestFloat(unittest.TestCase):
         self.assertEqual(self.bounds, self.normal_hp._bounds)
         self.assertEqual(self.bounds, self.normal_hp2._bounds)
         self.assertEqual(self.bounds, self.normal_hp3._bounds)
+        self.assertEqual(self.bounds, self.normal_hp4._bounds)
         self.assertEqual(self.bounds, self.uniform_hp._bounds)
         self.assertEqual(self.bounds, self.uniform_hp2._bounds)
         self.assertEqual(self.bounds, self.uniform_hp3._bounds)
+        self.assertEqual(self.bounds, self.uniform_hp4._bounds)
 
     def test_choices(self):
         """
@@ -83,9 +95,11 @@ class TestFloat(unittest.TestCase):
         self.assertIsNone(self.normal_hp._choices)
         self.assertIsNone(self.normal_hp2._choices)
         self.assertIsNone(self.normal_hp3._choices)
+        self.assertIsNone(self.normal_hp4._choices)
         self.assertIsNone(self.uniform_hp._choices)
         self.assertIsNone(self.uniform_hp2._choices)
         self.assertIsNone(self.uniform_hp3._choices)
+        self.assertIsNone(self.uniform_hp4._choices)
 
     def test_default(self):
         """
@@ -94,9 +108,11 @@ class TestFloat(unittest.TestCase):
         self.assertEqual(self.default, self.normal_hp._default)
         self.assertTrue(np.all(self.default2 == self.normal_hp2._default))
         self.assertTrue(np.all(self.default3 == self.normal_hp3._default))
+        self.assertTrue(np.all(self.default2 == self.normal_hp4._default))
         self.assertEqual(self.default, self.uniform_hp._default)
         self.assertTrue(np.all(self.default2 == self.uniform_hp2._default))
         self.assertTrue(np.all(self.default3 == self.uniform_hp3._default))
+        self.assertTrue(np.all(self.default2 == self.uniform_hp4._default))
 
     def test_distribution(self):
         """
@@ -105,9 +121,11 @@ class TestFloat(unittest.TestCase):
         self.assertIsInstance(self.normal_hp._distribution, Normal)
         self.assertIsInstance(self.normal_hp2._distribution, Normal)
         self.assertIsInstance(self.normal_hp3._distribution, Normal)
+        self.assertIsInstance(self.normal_hp4._distribution, Normal)
         self.assertIsInstance(self.uniform_hp._distribution, Uniform)
         self.assertIsInstance(self.uniform_hp2._distribution, Uniform)
         self.assertIsInstance(self.uniform_hp3._distribution, Uniform)
+        self.assertIsInstance(self.uniform_hp4._distribution, Uniform)
 
     def test_weights(self):
         """
@@ -116,9 +134,11 @@ class TestFloat(unittest.TestCase):
         self.assertIsNone(self.normal_hp._weights)
         self.assertIsNone(self.normal_hp2._weights)
         self.assertIsNone(self.normal_hp3._weights)
+        self.assertIsNone(self.normal_hp4._weights)
         self.assertIsNone(self.uniform_hp._weights)
         self.assertIsNone(self.uniform_hp2._weights)
         self.assertIsNone(self.uniform_hp3._weights)
+        self.assertIsNone(self.uniform_hp4._weights)
 
     def test_lb(self):
         """
@@ -127,9 +147,11 @@ class TestFloat(unittest.TestCase):
         self.assertEqual(self.bounds[0], self.normal_hp._lb)
         self.assertEqual(self.bounds[0], self.normal_hp2._lb)
         self.assertEqual(self.bounds[0], self.normal_hp3._lb)
+        self.assertEqual(self.bounds[0], self.normal_hp4._lb)
         self.assertEqual(self.bounds[0], self.uniform_hp._lb)
         self.assertEqual(self.bounds[0], self.uniform_hp2._lb)
         self.assertEqual(self.bounds[0], self.uniform_hp3._lb)
+        self.assertEqual(self.bounds[0], self.uniform_hp4._lb)
 
     def test_ub(self):
         """
@@ -138,9 +160,11 @@ class TestFloat(unittest.TestCase):
         self.assertEqual(self.bounds[1], self.normal_hp._ub)
         self.assertEqual(self.bounds[1], self.normal_hp2._ub)
         self.assertEqual(self.bounds[1], self.normal_hp3._ub)
+        self.assertEqual(self.bounds[1], self.normal_hp4._ub)
         self.assertEqual(self.bounds[1], self.uniform_hp._ub)
         self.assertEqual(self.bounds[1], self.uniform_hp2._ub)
         self.assertEqual(self.bounds[1], self.uniform_hp3._ub)
+        self.assertEqual(self.bounds[1], self.uniform_hp4._ub)
 
     def test_get_name(self):
         """
@@ -149,9 +173,11 @@ class TestFloat(unittest.TestCase):
         self.assertEqual(self.name, self.normal_hp.get_name())
         self.assertEqual(self.name, self.normal_hp2.get_name())
         self.assertEqual(self.name, self.normal_hp3.get_name())
+        self.assertEqual(self.name, self.normal_hp4.get_name())
         self.assertEqual(self.name, self.uniform_hp.get_name())
         self.assertEqual(self.name, self.uniform_hp2.get_name())
         self.assertEqual(self.name, self.uniform_hp3.get_name())
+        self.assertEqual(self.name, self.uniform_hp4.get_name())
 
     def test_get_default(self):
         """
@@ -160,9 +186,11 @@ class TestFloat(unittest.TestCase):
         self.assertEqual(self.default, self.normal_hp.get_default())
         self.assertTrue(np.all(self.default2 == self.normal_hp2.get_default()))
         self.assertTrue(np.all(self.default3 == self.normal_hp3.get_default()))
+        self.assertTrue(np.all(self.default2 == self.normal_hp4.get_default()))
         self.assertEqual(self.default, self.uniform_hp.get_default())
         self.assertTrue(np.all(self.default2 == self.uniform_hp2.get_default()))
         self.assertTrue(np.all(self.default3 == self.uniform_hp3.get_default()))
+        self.assertTrue(np.all(self.default2 == self.uniform_hp4.get_default()))
 
     def test_get_shape(self):
         """
@@ -171,9 +199,11 @@ class TestFloat(unittest.TestCase):
         self.assertEqual(self.shape, self.normal_hp.get_shape())
         self.assertEqual(self.shape2, self.normal_hp2.get_shape())
         self.assertEqual(self.shape2, self.normal_hp3.get_shape())
+        self.assertEqual(self.shape2, self.normal_hp4.get_shape())
         self.assertEqual(self.shape, self.uniform_hp.get_shape())
         self.assertEqual(self.shape2, self.uniform_hp2.get_shape())
         self.assertEqual(self.shape2, self.uniform_hp3.get_shape())
+        self.assertEqual(self.shape2, self.uniform_hp4.get_shape())
 
     def test_sample(self):
         """
@@ -204,9 +234,11 @@ class TestFloat(unittest.TestCase):
         self.assertEqual(self.normal_hp, self.normal_hp)
         self.assertNotEqual(self.normal_hp, self.normal_hp2)
         self.assertNotEqual(self.normal_hp, self.normal_hp3)
+        self.assertNotEqual(self.normal_hp, self.normal_hp4)
         self.assertEqual(self.uniform_hp, self.uniform_hp)
         self.assertNotEqual(self.uniform_hp, self.uniform_hp2)
         self.assertNotEqual(self.uniform_hp, self.uniform_hp3)
+        self.assertNotEqual(self.uniform_hp, self.uniform_hp4)
 
     def test_hash(self):
         """
@@ -215,10 +247,11 @@ class TestFloat(unittest.TestCase):
         self.assertEqual(hash(self.normal_hp), hash(self.normal_hp))
         self.assertNotEqual(hash(self.normal_hp), hash(self.normal_hp2))
         self.assertNotEqual(hash(self.normal_hp), hash(self.normal_hp3))
-
+        self.assertNotEqual(hash(self.normal_hp), hash(self.normal_hp4))
         self.assertEqual(hash(self.uniform_hp), hash(self.uniform_hp))
         self.assertNotEqual(hash(self.uniform_hp), hash(self.uniform_hp2))
         self.assertNotEqual(hash(self.uniform_hp), hash(self.uniform_hp3))
+        self.assertNotEqual(hash(self.uniform_hp), hash(self.uniform_hp4))
 
 
 if __name__ == '__main__':
