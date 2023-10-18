@@ -231,6 +231,8 @@ class Categorical(Hyperparameter):
     def sample(self, random: np.random.RandomState, size: Union[int, None] = None) -> Any:
         if isinstance(self._distribution, Choice):
             indices = random.choice(len(self._choices), size=size, replace=True, p=self._weights)
+            if isinstance(indices, int):
+                indices = [indices]
             return np.array([self._choices[idx] for idx in indices])
         else:
             raise Exception("#ERROR_BINARY: Unknown Probability Distribution!")
