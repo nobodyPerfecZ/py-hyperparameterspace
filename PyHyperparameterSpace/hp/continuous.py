@@ -74,10 +74,13 @@ class Float(Hyperparameter):
             return False
         if isinstance(default, (float, int)):
             # Case: Default is a float/int value
-            return self._lb <= default <= self._ub
-        else:
+            return self._lb <= default < self._ub
+        elif isinstance(default, np.ndarray):
             # Case: Default is a float/int matrix
-            return np.all((default >= self._lb) & (default <= self._ub))
+            return np.all((default >= self._lb) & (default < self._ub))
+        else:
+            # Case: Default is a float/int tensor
+            return torch.all((default >= self._lb) & (default < self._ub))
 
     def _check_shape(self, shape: Union[int, tuple[int, ...]]) -> Union[int, tuple[int, ...]]:
         if shape is None:

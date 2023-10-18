@@ -101,5 +101,5 @@ The following list defines features, that are currently on work:
 
 * [ ] Add Constraints to HyperparameterConfigurationSpace to also add Hierarchical Hyperparameters
 * [ ] Adjust Binary() and Categorical() to also use values that are matrices instead of single values
-* [ ] Add support for torch.Tensor to all types of Hyperparameters
+* [X] (Discarded due to lower performance) Add support for torch.Tensor to all types of Hyperparameters
 * [x] Dynamically adjust shape=... parameter, given to the default value

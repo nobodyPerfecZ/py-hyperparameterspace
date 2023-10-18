@@ -1,6 +1,5 @@
 import unittest
 import numpy as np
-import torch
 
 from PyHyperparameterSpace.hp.constant import Constant
 
@@ -16,7 +15,6 @@ class TestConstant(unittest.TestCase):
         self.shape3 = (2, 2)
         self.default = "X1"
         self.default3 = np.array([["attr1", "attr2"], ["attr3", "attr4"]])
-        self.default5 = torch.tensor([[1, 2], [3, 4]])
         self.random = np.random.RandomState()
         self.size = 10
         # Test with all options are given
@@ -27,8 +25,6 @@ class TestConstant(unittest.TestCase):
         self.hp3 = Constant(name=self.name, default=self.default3, shape=self.shape3)
         # Test with shape=None
         self.hp4 = Constant(name=self.name, default=self.default3, shape=None)
-        # Test with shape=None (where values are torch.Tensor)
-        self.hp5 = Constant(name=self.name, default=self.default5, shape=None)
 
     def test_name(self):
         """
@@ -38,7 +34,6 @@ class TestConstant(unittest.TestCase):
         self.assertEqual(self.name, self.hp2._name)
         self.assertEqual(self.name, self.hp3._name)
         self.assertEqual(self.name, self.hp4._name)
-        self.assertEqual(self.name, self.hp5._name)
 
     def test_shape(self):
         """
@@ -48,7 +43,6 @@ class TestConstant(unittest.TestCase):
         self.assertEqual(self.shape, self.hp2._shape)
         self.assertEqual(self.shape3, self.hp3._shape)
         self.assertEqual(self.shape3, self.hp4._shape)
-        self.assertEqual(self.shape3, self.hp5._shape)
 
     def test_bounds(self):
         """
@@ -58,7 +52,6 @@ class TestConstant(unittest.TestCase):
         self.assertIsNone(self.hp2._bounds)
         self.assertIsNone(self.hp3._bounds)
         self.assertIsNone(self.hp4._bounds)
-        self.assertIsNone(self.hp5._bounds)
 
     def test_choices(self):
         """
@@ -68,7 +61,6 @@ class TestConstant(unittest.TestCase):
         self.assertIsNone(self.hp2._choices)
         self.assertIsNone(self.hp3._choices)
         self.assertIsNone(self.hp4._choices)
-        self.assertIsNone(self.hp5._choices)
 
     def test_default(self):
         """
@@ -78,7 +70,6 @@ class TestConstant(unittest.TestCase):
         self.assertEqual(self.default, self.hp2._default)
         self.assertTrue(np.all(self.default3 == self.hp3._default))
         self.assertTrue(np.all(self.default3 == self.hp4._default))
-        self.assertTrue(torch.all(self.default5 == self.hp5._default))
 
     def test_distribution(self):
         """
@@ -88,7 +79,6 @@ class TestConstant(unittest.TestCase):
         self.assertIsNone(self.hp2._distribution)
         self.assertIsNone(self.hp3._distribution)
         self.assertIsNone(self.hp4._distribution)
-        self.assertIsNone(self.hp5._distribution)
 
     def test_weights(self):
         """
@@ -98,7 +88,6 @@ class TestConstant(unittest.TestCase):
         self.assertIsNone(self.hp2._weights)
         self.assertIsNone(self.hp3._weights)
         self.assertIsNone(self.hp4._weights)
-        self.assertIsNone(self.hp5._weights)
 
     def test_lb(self):
         """
@@ -108,7 +97,6 @@ class TestConstant(unittest.TestCase):
         self.assertIsNone(self.hp2._lb)
         self.assertIsNone(self.hp3._lb)
         self.assertIsNone(self.hp4._lb)
-        self.assertIsNone(self.hp5._lb)
 
     def test_ub(self):
         """
@@ -118,7 +106,6 @@ class TestConstant(unittest.TestCase):
         self.assertIsNone(self.hp2._ub)
         self.assertIsNone(self.hp3._ub)
         self.assertIsNone(self.hp4._ub)
-        self.assertIsNone(self.hp5._ub)
 
     def test_get_name(self):
         """
@@ -128,7 +115,6 @@ class TestConstant(unittest.TestCase):
         self.assertEqual(self.name, self.hp2.get_name())
         self.assertEqual(self.name, self.hp3.get_name())
         self.assertEqual(self.name, self.hp4.get_name())
-        self.assertEqual(self.name, self.hp5.get_name())
 
     def test_get_default(self):
         """
@@ -138,7 +124,6 @@ class TestConstant(unittest.TestCase):
         self.assertEqual(self.default, self.hp2.get_default())
         self.assertTrue(np.all(self.default3 == self.hp3.get_default()))
         self.assertTrue(np.all(self.default3 == self.hp4.get_default()))
-        self.assertTrue(torch.all(self.default5 == self.hp5.get_default()))
 
     def test_get_shape(self):
         """
@@ -148,7 +133,6 @@ class TestConstant(unittest.TestCase):
         self.assertEqual(self.shape, self.hp2.get_shape())
         self.assertEqual(self.shape3, self.hp3.get_shape())
         self.assertEqual(self.shape3, self.hp4.get_shape())
-        self.assertEqual(self.shape3, self.hp5.get_shape())
 
     def test_sample(self):
         """
@@ -172,11 +156,6 @@ class TestConstant(unittest.TestCase):
         self.assertEqual(self.shape3, sample4[0].shape)
         self.assertTrue(np.all(self.default3 == sample4[0]))
 
-        sample5 = self.hp5.sample(random=self.random, size=self.size)
-        self.assertEqual(self.size, len(sample5))
-        self.assertEqual(self.shape3, sample5[0].size())
-        self.assertTrue(torch.all(self.default5 == sample5[0]))
-
     def test_eq(self):
         """
         Tests the magic function __eq__.
@@ -185,7 +164,6 @@ class TestConstant(unittest.TestCase):
         self.assertEqual(self.hp, self.hp2)
         self.assertNotEqual(self.hp, self.hp3)
         self.assertNotEqual(self.hp, self.hp4)
-        self.assertNotEqual(self.hp, self.hp5)
 
     def test_hash(self):
         """
@@ -195,7 +173,6 @@ class TestConstant(unittest.TestCase):
         self.assertEqual(hash(self.hp), hash(self.hp2))
         self.assertNotEqual(hash(self.hp), hash(self.hp3))
         self.assertNotEqual(hash(self.hp), hash(self.hp4))
-        self.assertNotEqual(hash(self.hp), hash(self.hp5))
 
 
 if __name__ == '__main__':
