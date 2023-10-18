@@ -26,7 +26,7 @@ class Hyperparameter(ABC):
             bounds: Union[tuple[int, int], tuple[float, float], None] = None,
             choices: Union[list[Any], None] = None,
             default: Any = None,
-            shape: Union[int, tuple[int, ...], None] = (1,),
+            shape: Union[int, tuple[int, ...], None] = None,
             distribution: Union[Distribution, None] = None,
             weights: Union[list[int], list[float], None] = None,
     ):

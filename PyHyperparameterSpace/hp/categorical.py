@@ -102,8 +102,7 @@ class Binary(Hyperparameter):
 
     def sample(self, random: np.random.RandomState, size: Union[int, None] = None) -> Any:
         if isinstance(self._distribution, Choice):
-            sample_size = Binary._get_sample_size(size=size, shape=self._shape)
-            return random.choice(self._choices, size=sample_size, replace=True, p=self._weights)
+            return random.choice(self._choices, size=size, replace=True, p=self._weights)
         else:
             raise Exception("#ERROR_BINARY: Unknown Probability Distribution!")
 
@@ -136,9 +135,10 @@ class Categorical(Hyperparameter):
             name: str,
             choices: list[Any],
             default: Union[Any, None] = None,
+            shape: Union[int, tuple[int, ...], None] = None,
             weights: Union[list[int], list[float], None] = None,
     ):
-        super().__init__(name=name, shape=(1,), bounds=None, choices=choices, default=default, distribution=Choice(),
+        super().__init__(name=name, shape=shape, bounds=None, choices=choices, default=default, distribution=Choice(),
                          weights=weights)
 
     def _check_bounds(self, bounds: Union[tuple[int, int], tuple[float, float], None]) \
@@ -174,19 +174,34 @@ class Categorical(Hyperparameter):
             raise Exception(f"Illegal default value {default}!")
 
     def _is_legal_default(self, default: Union[Any, None]) -> bool:
-        return default in self._choices
+        if isinstance(default, np.ndarray):
+            return any(np.array_equal(default, choice) for choice in self._choices)
+        else:
+            return default in self._choices
 
     def _check_shape(self, shape: Union[int, tuple[int, ...], None]) -> Union[int, tuple[int, ...], None]:
-        if self._is_legal_shape(shape):
+        if shape is None:
+            # Case: Adjust the shape according to the given default value
+            if self._default is None or isinstance(self._default, (int, float, bool, str)):
+                return (1,)
+            elif isinstance(self._default, np.ndarray):
+                return self._default.shape
+        elif self._is_legal_shape(shape):
             return shape
         else:
             raise Exception(f"Illegal shape {shape}")
 
     def _is_legal_shape(self, shape: Union[int, tuple[int, ...], None]) -> bool:
-        if shape is None or shape == 1 or shape == (1,):
-            return True
-        else:
-            return False
+        if shape == 1 or shape == (1,):
+            if isinstance(self._default, (int, float, bool, str)):
+                return True
+        elif isinstance(shape, (int, float, bool, str)):
+            if isinstance(self._default, np.ndarray) and shape == len(self._default):
+                return True
+        elif isinstance(shape, tuple) and all(isinstance(s, int) for s in shape):
+            if isinstance(self._default, np.ndarray) and shape == self._default.shape:
+                return True
+        return False
 
     def _check_distribution(self, distribution: Union[Distribution, None]) -> Union[Distribution, None]:
         if self._is_legal_distribution(distribution):
@@ -215,8 +230,8 @@ class Categorical(Hyperparameter):
 
     def sample(self, random: np.random.RandomState, size: Union[int, None] = None) -> Any:
         if isinstance(self._distribution, Choice):
-            sample_size = Binary._get_sample_size(size=size, shape=self._shape)
-            return random.choice(self._choices, size=sample_size, replace=True, p=self._weights)
+            indices = random.choice(len(self._choices), size=size, replace=True, p=self._weights)
+            return np.array([self._choices[idx] for idx in indices])
         else:
             raise Exception("#ERROR_BINARY: Unknown Probability Distribution!")
 
