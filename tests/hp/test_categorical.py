@@ -138,6 +138,16 @@ class TestCategorical(unittest.TestCase):
         self.assertEqual(self.name, self.hp4.get_name())
         self.assertEqual(self.name, self.hp5.get_name())
 
+    def test_get_choices(self):
+        """
+        Tests the method get_choices().
+        """
+        self.assertEqual(self.choices, self.hp.get_choices())
+        self.assertEqual(self.choices, self.hp2.get_choices())
+        self.assertEqual(self.choices, self.hp3.get_choices())
+        self.assertEqual(self.choices, self.hp4.get_choices())
+        self.assertEqual(self.choices5, self.hp5.get_choices())
+
     def test_get_default(self):
         """
         Tests the method get_default().

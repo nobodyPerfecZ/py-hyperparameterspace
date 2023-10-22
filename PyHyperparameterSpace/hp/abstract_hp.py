@@ -76,6 +76,13 @@ class Hyperparameter(ABC):
         """
         return self._name
 
+    def get_choices(self) -> list[str]:
+        """
+        Returns:
+            list[str]: list of choices
+        """
+        return self._choices
+
     def get_default(self) -> Any:
         """
         Returns:

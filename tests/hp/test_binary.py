@@ -119,6 +119,15 @@ class TestBinary(unittest.TestCase):
         self.assertEqual(self.name, self.hp3.get_name())
         self.assertEqual(self.name, self.hp4.get_name())
 
+    def test_get_choices(self):
+        """
+        Tests the method get_choices().
+        """
+        self.assertEqual([True, False], self.hp.get_choices())
+        self.assertEqual([True, False], self.hp2.get_choices())
+        self.assertEqual([True, False], self.hp3.get_choices())
+        self.assertEqual([True, False], self.hp4.get_choices())
+
     def test_get_default(self):
         """
         Tests the method get_default().

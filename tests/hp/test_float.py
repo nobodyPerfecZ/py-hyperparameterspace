@@ -179,6 +179,19 @@ class TestFloat(unittest.TestCase):
         self.assertEqual(self.name, self.uniform_hp3.get_name())
         self.assertEqual(self.name, self.uniform_hp4.get_name())
 
+    def test_get_choices(self):
+        """
+        Tests the method get_choices().
+        """
+        self.assertIsNone(self.normal_hp.get_choices())
+        self.assertIsNone(self.normal_hp2.get_choices())
+        self.assertIsNone(self.normal_hp3.get_choices())
+        self.assertIsNone(self.normal_hp4.get_choices())
+        self.assertIsNone(self.uniform_hp.get_choices())
+        self.assertIsNone(self.uniform_hp2.get_choices())
+        self.assertIsNone(self.uniform_hp3.get_choices())
+        self.assertIsNone(self.uniform_hp4.get_choices())
+
     def test_get_default(self):
         """
         Tests the method get_default().
