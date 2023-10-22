@@ -24,6 +24,9 @@ class HyperparameterConfiguration(Mapping[str, Any]):
     def __getitem__(self, key: str) -> Any:
         return self._values.__getitem__(key)
 
+    def __setitem__(self, key: str, value: Any):
+        self._values[key] = value
+
     def __len__(self) -> int:
         return self._values.__len__()
 

@@ -96,19 +96,19 @@ class TestBinary(unittest.TestCase):
         """
         Tests the property lb.
         """
-        self.assertIsNone(self.hp._lb)
-        self.assertIsNone(self.hp2._lb)
-        self.assertIsNone(self.hp3._lb)
-        self.assertIsNone(self.hp4._lb)
+        self.assertIsNone(self.hp.lb)
+        self.assertIsNone(self.hp2.lb)
+        self.assertIsNone(self.hp3.lb)
+        self.assertIsNone(self.hp4.lb)
 
     def test_ub(self):
         """
         Tests the property ub.
         """
-        self.assertIsNone(self.hp._ub)
-        self.assertIsNone(self.hp2._ub)
-        self.assertIsNone(self.hp3._ub)
-        self.assertIsNone(self.hp4._ub)
+        self.assertIsNone(self.hp.ub)
+        self.assertIsNone(self.hp2.ub)
+        self.assertIsNone(self.hp3.ub)
+        self.assertIsNone(self.hp4.ub)
 
     def test_get_name(self):
         """

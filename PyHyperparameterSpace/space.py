@@ -108,6 +108,11 @@ class HyperparameterConfigurationSpace(Mapping[str, Hyperparameter]):
             return dict(self) == dict(other)
         return NotImplemented
 
+    def __setitem__(self, key: str, value: Any):
+        if isinstance(value, Hyperparameter):
+            self._values[key] = value
+        return NotImplemented
+
     def __hash__(self) -> int:
         return hash(self.__repr__())
 

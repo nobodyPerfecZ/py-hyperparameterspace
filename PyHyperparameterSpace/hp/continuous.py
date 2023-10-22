@@ -55,10 +55,10 @@ class Float(Hyperparameter):
         if default is None:
             if self._shape is None or self._shape == 1 or self._shape == (1,):
                 # Case: default value is not given and shape signalize single value
-                return (self._lb + self._ub) / 2
+                return (self.lb + self.ub) / 2
             else:
                 # Case: make a default value matrix
-                return np.full(shape=self._shape, fill_value=((self._lb + self._ub) / 2))
+                return np.full(shape=self._shape, fill_value=((self.lb + self.ub) / 2))
         elif self._is_legal_default(default):
             # Case: default value is legal
             return default
@@ -74,13 +74,13 @@ class Float(Hyperparameter):
             return False
         if isinstance(default, (float, int)):
             # Case: Default is a float/int value
-            return self._lb <= default < self._ub
+            return self.lb <= default < self.ub
         elif isinstance(default, np.ndarray):
             # Case: Default is a float/int matrix
-            return np.all((default >= self._lb) & (default < self._ub))
+            return np.all((default >= self.lb) & (default < self.ub))
         else:
             # Case: Default is a float/int tensor
-            return torch.all((default >= self._lb) & (default < self._ub))
+            return torch.all((default >= self.lb) & (default < self.ub))
 
     def _check_shape(self, shape: Union[int, tuple[int, ...]]) -> Union[int, tuple[int, ...]]:
         if shape is None:
@@ -119,7 +119,7 @@ class Float(Hyperparameter):
         if isinstance(distribution, Normal):
             # Case: Normal distribution
             # Check if mean (loc) is in between the bounds
-            return self._lb <= distribution.loc < self._ub
+            return self.lb <= distribution.loc < self.ub
         elif isinstance(distribution, Uniform):
             # Case: Uniform distribution
             return True
@@ -142,19 +142,19 @@ class Float(Hyperparameter):
             # Do not exceed lower, upper bound
             if isinstance(sample, float):
                 # Case: Sample is a single value
-                if sample < self._lb:
-                    sample = self._lb
-                elif sample >= self._ub:
-                    sample = self._ub - 1e-10
+                if sample < self.lb:
+                    sample = self.lb
+                elif sample >= self.ub:
+                    sample = self.ub - 1e-10
             else:
                 # Case: Sample is a numpy array
-                sample[sample < self._lb] = self._lb
-                sample[sample >= self._ub] = self._ub - 1e-10
+                sample[sample < self.lb] = self.lb
+                sample[sample >= self.ub] = self.ub - 1e-10
             return sample
         elif isinstance(self._distribution, Uniform):
             # Case: Sample from uniform distribution
             sample_size = Float._get_sample_size(size=size, shape=self._shape)
-            sample = random.uniform(low=self._lb, high=self._ub, size=sample_size)
+            sample = random.uniform(low=self.lb, high=self.ub, size=sample_size)
             return sample
         else:
             raise Exception("#ERROR_FLOAT: Unknown Probability Distribution!")
@@ -217,10 +217,10 @@ class Integer(Hyperparameter):
         if default is None:
             if self._shape is None or self._shape == 1 or self._shape == (1,):
                 # Case: shape signalize single value
-                return int((self._lb + self._ub) / 2)
+                return int((self.lb + self.ub) / 2)
             else:
                 # Case: make a default value matrix
-                return np.full(shape=self._shape, fill_value=int((self._lb + self._ub) / 2))
+                return np.full(shape=self._shape, fill_value=int((self.lb + self.ub) / 2))
         elif self._is_legal_default(default):
             # Case: default value is legal
             return default
@@ -235,10 +235,10 @@ class Integer(Hyperparameter):
             return False
         if isinstance(default, int):
             # Case: Default is a float/int value
-            return self._lb <= default <= self._ub
+            return self.lb <= default <= self.ub
         else:
             # Case: Default is a float/int matrix
-            return np.all((default >= self._lb) & (default <= self._ub))
+            return np.all((default >= self.lb) & (default <= self.ub))
 
     def _check_shape(self, shape: Union[int, tuple[int, ...]]) -> Union[int, tuple[int, ...]]:
         if shape is None:
@@ -289,7 +289,7 @@ class Integer(Hyperparameter):
     def sample(self, random: np.random.RandomState, size: Union[int, None] = None) -> Any:
         if isinstance(self._distribution, Uniform):
             sample_size = Float._get_sample_size(size=size, shape=self._shape)
-            sample = random.randint(low=self._lb, high=self._ub, size=sample_size)
+            sample = random.randint(low=self.lb, high=self.ub, size=sample_size)
             return sample
         else:
             raise Exception("#ERROR_INTEGER: Unknown Probability Distribution!")

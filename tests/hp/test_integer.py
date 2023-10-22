@@ -97,19 +97,19 @@ class TestInteger(unittest.TestCase):
         """
         Tests the property lb.
         """
-        self.assertEqual(self.bounds[0], self.hp._lb)
-        self.assertEqual(self.bounds[0], self.hp2._lb)
-        self.assertEqual(self.bounds[0], self.hp3._lb)
-        self.assertEqual(self.bounds[0], self.hp4._lb)
+        self.assertEqual(self.bounds[0], self.hp.lb)
+        self.assertEqual(self.bounds[0], self.hp2.lb)
+        self.assertEqual(self.bounds[0], self.hp3.lb)
+        self.assertEqual(self.bounds[0], self.hp4.lb)
 
     def test_ub(self):
         """
         Tests the property ub.
         """
-        self.assertEqual(self.bounds[1], self.hp._ub)
-        self.assertEqual(self.bounds[1], self.hp2._ub)
-        self.assertEqual(self.bounds[1], self.hp3._ub)
-        self.assertEqual(self.bounds[1], self.hp4._ub)
+        self.assertEqual(self.bounds[1], self.hp.ub)
+        self.assertEqual(self.bounds[1], self.hp2.ub)
+        self.assertEqual(self.bounds[1], self.hp3.ub)
+        self.assertEqual(self.bounds[1], self.hp4.ub)
 
     def test_get_name(self):
         """

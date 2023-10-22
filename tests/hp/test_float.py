@@ -144,27 +144,27 @@ class TestFloat(unittest.TestCase):
         """
         Tests the property lb.
         """
-        self.assertEqual(self.bounds[0], self.normal_hp._lb)
-        self.assertEqual(self.bounds[0], self.normal_hp2._lb)
-        self.assertEqual(self.bounds[0], self.normal_hp3._lb)
-        self.assertEqual(self.bounds[0], self.normal_hp4._lb)
-        self.assertEqual(self.bounds[0], self.uniform_hp._lb)
-        self.assertEqual(self.bounds[0], self.uniform_hp2._lb)
-        self.assertEqual(self.bounds[0], self.uniform_hp3._lb)
-        self.assertEqual(self.bounds[0], self.uniform_hp4._lb)
+        self.assertEqual(self.bounds[0], self.normal_hp.lb)
+        self.assertEqual(self.bounds[0], self.normal_hp2.lb)
+        self.assertEqual(self.bounds[0], self.normal_hp3.lb)
+        self.assertEqual(self.bounds[0], self.normal_hp4.lb)
+        self.assertEqual(self.bounds[0], self.uniform_hp.lb)
+        self.assertEqual(self.bounds[0], self.uniform_hp2.lb)
+        self.assertEqual(self.bounds[0], self.uniform_hp3.lb)
+        self.assertEqual(self.bounds[0], self.uniform_hp4.lb)
 
     def test_ub(self):
         """
         Tests the property ub.
         """
-        self.assertEqual(self.bounds[1], self.normal_hp._ub)
-        self.assertEqual(self.bounds[1], self.normal_hp2._ub)
-        self.assertEqual(self.bounds[1], self.normal_hp3._ub)
-        self.assertEqual(self.bounds[1], self.normal_hp4._ub)
-        self.assertEqual(self.bounds[1], self.uniform_hp._ub)
-        self.assertEqual(self.bounds[1], self.uniform_hp2._ub)
-        self.assertEqual(self.bounds[1], self.uniform_hp3._ub)
-        self.assertEqual(self.bounds[1], self.uniform_hp4._ub)
+        self.assertEqual(self.bounds[1], self.normal_hp.ub)
+        self.assertEqual(self.bounds[1], self.normal_hp2.ub)
+        self.assertEqual(self.bounds[1], self.normal_hp3.ub)
+        self.assertEqual(self.bounds[1], self.normal_hp4.ub)
+        self.assertEqual(self.bounds[1], self.uniform_hp.ub)
+        self.assertEqual(self.bounds[1], self.uniform_hp2.ub)
+        self.assertEqual(self.bounds[1], self.uniform_hp3.ub)
+        self.assertEqual(self.bounds[1], self.uniform_hp4.ub)
 
     def test_get_name(self):
         """

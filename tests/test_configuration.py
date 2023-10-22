@@ -46,6 +46,13 @@ class TestHyperparameterConfiguration(unittest.TestCase):
         with self.assertRaises(KeyError):
             test = self.cfg["X"]
 
+    def test_setitem(self):
+        """
+        Tests the magic function __setitem__.
+        """
+        self.cfg["X"] = 0.4
+        self.assertEqual(0.4, self.cfg["X"])
+
     def test_len(self):
         """
         Tests the magic function __len__.

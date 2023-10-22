@@ -98,6 +98,15 @@ class TestHyperparameterConfigurationSpace(unittest.TestCase):
         with self.assertRaises(KeyError):
             self.cs["X"]
 
+    def test_setitem(self):
+        """
+        Tests the magic function __setitem__.
+        """
+        hp = Float("X1", bounds=(-11, 11), default=2.25, shape=(1,), distribution=Normal(2.25, 2.5))
+        self.cs["X1"] = hp
+
+        self.assertEqual(hp, self.cs["X1"])
+
     def test_len(self):
         """
         Tests the magic function __len__.

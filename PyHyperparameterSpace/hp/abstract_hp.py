@@ -48,7 +48,7 @@ class Hyperparameter(ABC):
         self._weights = self._check_weights(weights)
 
     @property
-    def _lb(self) -> Union[int, float, None]:
+    def lb(self) -> Union[int, float, None]:
         """
         Returns:
             Union[int, float, None]: lower bound of the range
@@ -59,7 +59,7 @@ class Hyperparameter(ABC):
             return None
 
     @property
-    def _ub(self) -> Union[int, float, None]:
+    def ub(self) -> Union[int, float, None]:
         """
         Returns:
             Union[int, float, None]: upper bound of the range
