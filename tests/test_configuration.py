@@ -1,4 +1,5 @@
 import unittest
+import numpy as np
 
 from PyHyperparameterSpace.configuration import HyperparameterConfiguration
 
@@ -14,7 +15,7 @@ class TestHyperparameterConfiguration(unittest.TestCase):
                 "X1": 0.1,
                 "X2": True,
                 "X3": 1,
-                "X4": "attribute1",
+                "X4": np.array(["attribute1", "attribute2"]),
                 "X5": -1.2,
             },
         )
@@ -23,7 +24,7 @@ class TestHyperparameterConfiguration(unittest.TestCase):
                 "X1": 0.2,
                 "X2": False,
                 "X3": 3,
-                "X4": "attribute1",
+                "X4": np.array(["attribute1", "attribute2"]),
                 "X5": -1.2,
             },
         )
@@ -43,7 +44,7 @@ class TestHyperparameterConfiguration(unittest.TestCase):
         self.assertEqual(0.1, self.cfg["X1"])
         self.assertEqual(1, self.cfg["X3"])
         with self.assertRaises(KeyError):
-            self.cfg["X"]
+            test = self.cfg["X"]
 
     def test_len(self):
         """

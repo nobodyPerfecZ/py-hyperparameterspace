@@ -32,7 +32,7 @@ class HyperparameterConfiguration(Mapping[str, Any]):
 
     def __eq__(self, other: Any) -> bool:
         if isinstance(other, self.__class__):
-            return dict(self) == dict(other)
+            return hash(self) == hash(other)
         return NotImplemented
 
     def __hash__(self):

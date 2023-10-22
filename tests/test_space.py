@@ -1,4 +1,5 @@
 import unittest
+import numpy as np
 
 from PyHyperparameterSpace.space import HyperparameterConfigurationSpace
 from PyHyperparameterSpace.hp.continuous import Float, Integer
@@ -33,7 +34,7 @@ class TestHyperparameterConfigurationSpace(unittest.TestCase):
                 "X2": Binary("X2", default=False),
                 "X3": Integer("X3", bounds=(-10, 10), default=0, shape=(1,)),
                 "X4": Categorical("X4", choices=["attr1", "attr2", "attr3"], default="attr3", weights=[0.4, 0.3, 0.3]),
-                "X5": Constant("X5", default="X_Const", shape=(1,)),
+                "X5": Constant("X5", default=np.array(["X_Const", "X_Const"]), shape=(2,)),
             },
             seed=1,
         )
