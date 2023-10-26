@@ -100,6 +100,8 @@ cs = HyperparameterConfigurationSpace(
 The following list defines features, that are currently on work:
 
 * [ ] Add Constraints to HyperparameterConfigurationSpace to also add Hierarchical Hyperparameters
+* [x] Implement saving functions of HyperparameterConfiguration in JSON and YML format
+* [ ] Remove Binary() class, because it is very similar to categorical
 * [x] (For Binary() not possible due to the nature of binary values) Adjust Binary() and Categorical() to also use values that are matrices instead of single values
 * [x] (Discarded due to lower performance) Add support for torch.Tensor to all types of Hyperparameters
 * [x] Dynamically adjust shape=... parameter, given to the default value

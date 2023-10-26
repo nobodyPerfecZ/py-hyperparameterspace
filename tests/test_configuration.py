@@ -1,5 +1,6 @@
 import unittest
 import numpy as np
+import yaml
 
 from PyHyperparameterSpace.configuration import HyperparameterConfiguration
 
@@ -28,6 +29,30 @@ class TestHyperparameterConfiguration(unittest.TestCase):
                 "X5": -1.2,
             },
         )
+
+    def test_save_yaml(self):
+        """
+        Tests the method save_yaml().
+        """
+        # Safe the configuration as yaml file
+        self.cfg.save_yaml("test_data.yaml")
+
+        # Load the configuration from the yaml file
+        cfg = HyperparameterConfiguration.load_yaml("test_data.yaml")
+
+        self.assertTrue(np.array_equal(self.cfg, cfg))
+
+    def test_save_json(self):
+        """
+        Tests the method save_json().
+        """
+        # Safe the configuration as json file
+        self.cfg.save_json("test_data.json")
+
+        # Load the configuration from the json file
+        cfg = HyperparameterConfiguration.load_json("test_data.json")
+
+        self.assertTrue(np.array_equal(self.cfg, cfg))
 
     def test_contains(self):
         """
