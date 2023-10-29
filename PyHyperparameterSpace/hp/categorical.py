@@ -122,7 +122,7 @@ class Categorical(Hyperparameter):
                 indices = [indices]
             return np.array([self._choices[idx] for idx in indices])
         else:
-            raise Exception("#ERROR_BINARY: Unknown Probability Distribution!")
+            raise Exception("#ERROR_CATEGORICAL: Unknown Probability Distribution!")
 
     def __eq__(self, other: Any) -> bool:
         if isinstance(other, self.__class__):
