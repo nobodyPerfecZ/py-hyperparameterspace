@@ -3,7 +3,7 @@ import numpy as np
 
 from PyHyperparameterSpace.space import HyperparameterConfigurationSpace
 from PyHyperparameterSpace.hp.continuous import Float, Integer
-from PyHyperparameterSpace.hp.categorical import Binary, Categorical
+from PyHyperparameterSpace.hp.categorical import Categorical
 from PyHyperparameterSpace.hp.constant import Constant
 from PyHyperparameterSpace.dist.continuous import Normal, Uniform
 
@@ -17,7 +17,7 @@ class TestHyperparameterConfigurationSpace(unittest.TestCase):
         self.cs = HyperparameterConfigurationSpace(
             values={
                 "X1": Float("X1", bounds=(-10.5, 10.5), default=2.25, shape=(1,), distribution=Normal(2.25, 2.5)),
-                "X2": Binary("X2", default=True),
+                "X2": Categorical("X2", choices=[True, False], default=True),
                 "X3": Integer("X3", bounds=(-10, 10), default=-5, shape=(1,)),
                 "X4": Categorical("X4", choices=["attr1", "attr2", "attr3"], default="attr1", weights=[0.3, 0.4, 0.3]),
                 "X5": Constant("X5", default="X_Const", shape=(1,)),
@@ -26,12 +26,12 @@ class TestHyperparameterConfigurationSpace(unittest.TestCase):
         )
         self.new_hps = [
             Integer("X6", bounds=(-3, 3), default=0, shape=(1,)),
-            Binary("X7", default=True),
+            Categorical("X7", choices=[True, False], default=True),
         ]
         self.cs2 = HyperparameterConfigurationSpace(
             values={
                 "X1": Float("X1", bounds=(-10.5, 10.5), default=2.25, shape=(1,), distribution=Normal(2.25, 2.5)),
-                "X2": Binary("X2", default=False),
+                "X2": Categorical("X2", choices=[True, False], default=False),
                 "X3": Integer("X3", bounds=(-10, 10), default=0, shape=(1,)),
                 "X4": Categorical("X4", choices=["attr1", "attr2", "attr3"], default="attr3", weights=[0.4, 0.3, 0.3]),
                 "X5": Constant("X5", default=np.array(["X_Const", "X_Const"]), shape=(2,)),
