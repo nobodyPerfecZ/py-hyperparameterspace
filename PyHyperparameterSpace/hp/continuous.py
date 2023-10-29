@@ -1,8 +1,7 @@
 from typing import Union, Iterable, Any
 import numpy as np
 
-from PyHyperparameterSpace.dist.continuous import Normal
-from PyHyperparameterSpace.dist.continuous import Uniform
+from PyHyperparameterSpace.dist.continuous import MultivariateNormal, Normal, Uniform
 from PyHyperparameterSpace.hp.abstract_hp import Hyperparameter
 from PyHyperparameterSpace.dist.abstract_dist import Distribution
 
@@ -23,10 +22,13 @@ class Float(Hyperparameter):
             self,
             name: str,
             bounds: Union[tuple[float, float], tuple[int, int]],
-            default: Union[int, float, np.ndarray] = None,
+            default: Union[int, float, list, np.ndarray] = None,
             shape: Union[int, tuple[int, ...], None] = None,
             distribution: Distribution = Uniform(),
     ):
+        if isinstance(default, list):
+            default = np.array(default, dtype=float)
+
         super().__init__(name=name, shape=shape, bounds=bounds, choices=None, default=default,
                          distribution=distribution, weights=None)
 
@@ -113,10 +115,17 @@ class Float(Hyperparameter):
         if self._is_legal_distribution(distribution):
             return distribution
         else:
-            raise Exception(f"Illegal distribution {distribution}")
+            raise Exception(f"Illegal distribution {distribution}!")
 
     def _is_legal_distribution(self, distribution: Union[Distribution, None]) -> bool:
-        if isinstance(distribution, Normal):
+        if isinstance(distribution, MultivariateNormal):
+            # Case: Multivariate normal distribution
+            # Check if mean is in between the bounds and shape should have a format of (N,)
+            return all(self.lb <= m <= self.ub for m in distribution.mean) and \
+                   self._shape == (len(distribution.mean),) and \
+                   len(distribution.mean) > 1 and \
+                   len(distribution.cov) > 1
+        elif isinstance(distribution, Normal):
             # Case: Normal distribution
             # Check if mean (loc) is in between the bounds
             return self.lb <= distribution.loc < self.ub
@@ -134,7 +143,23 @@ class Float(Hyperparameter):
         raise Exception("Float hyperparameter does not have weights for choices!")
 
     def sample(self, random: np.random.RandomState, size: Union[int, None] = None) -> Any:
-        if isinstance(self._distribution, Normal):
+        if isinstance(self._distribution, MultivariateNormal):
+            # Case: Sample from multivariate normal distribution
+            sample = random.multivariate_normal(mean=self._distribution.mean, cov=self._distribution.cov, size=size)
+
+            # Do not exceed lower, upper bound
+            if isinstance(sample, float):
+                # Case: Sample is a single value
+                if sample < self.lb:
+                    sample = self.lb
+                elif sample >= self.ub:
+                    sample = self.ub - 1e-10
+            else:
+                # Case: Sample is a numpy array
+                sample[sample < self.lb] = self.lb
+                sample[sample >= self.ub] = self.ub - 1e-10
+            return sample
+        elif isinstance(self._distribution, Normal):
             # Case: Sample from normal distribution
             sample_size = Float._get_sample_size(size=size, shape=self._shape)
             sample = random.normal(loc=self._distribution.loc, scale=self._distribution.scale, size=sample_size)
@@ -187,9 +212,12 @@ class Integer(Hyperparameter):
             self,
             name: str,
             bounds: Union[tuple[int, int], None],
-            default: Union[int, np.ndarray] = None,
+            default: Union[int, list, np.ndarray, None] = None,
             shape: Union[int, tuple[int, ...], None] = None,
     ):
+        if isinstance(default, list):
+            default = np.array(default)
+
         super().__init__(name=name, shape=shape, bounds=bounds, choices=None, default=default, distribution=Uniform(),
                          weights=None)
 
