@@ -1,5 +1,6 @@
 import unittest
 import numpy as np
+import yaml
 
 from PyHyperparameterSpace.space import HyperparameterConfigurationSpace
 from PyHyperparameterSpace.hp.continuous import Float, Integer
@@ -124,6 +125,21 @@ class TestHyperparameterConfigurationSpace(unittest.TestCase):
         Tests the magic function __hash__.
         """
         self.assertNotEqual(hash(self.cs), hash(self.cs2))
+
+    def test_set_get_state(self):
+        """
+        Tests the magic functions __getstate__ and __setstate__.
+        """
+        # Safe the hyperparameter as yaml file
+        with open("test_data.yaml", "w") as yaml_file:
+            yaml.dump(self.cs, yaml_file)
+
+        # Load the hyperparameter from the yaml file
+        with open("test_data.yaml", "r") as yaml_file:
+            cs = yaml.load(yaml_file, Loader=yaml.Loader)
+
+        # Check if they are equal
+        self.assertEqual(cs, self.cs)
 
 
 if __name__ == '__main__':

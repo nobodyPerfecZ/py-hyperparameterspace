@@ -214,7 +214,8 @@ class Categorical(Hyperparameter):
             bool:
                 True if weights are legal
         """
-        if isinstance(weights, (list, np.ndarray)) and len(weights) == len(self._choices) and all(0 <= w for w in weights):
+        if isinstance(weights, (list, np.ndarray)) and len(weights) == len(self._choices) and all(
+                0 <= w for w in weights):
             return True
         return False
 
@@ -227,6 +228,14 @@ class Categorical(Hyperparameter):
         else:
             raise Exception(f"Unknown Probability Distribution {self._distribution}!")
 
+    def valid_configuration(self, value: Any) -> bool:
+        if isinstance(value, (list, np.ndarray)):
+            # Case: Value is multi-dimensional
+            return any(np.array_equal(value, choice) for choice in self._choices)
+        else:
+            # Case: value is single-dimensional
+            return value in self._choices
+
     def __eq__(self, other: Any) -> bool:
         if isinstance(other, self.__class__):
             return hash(self) == hash(other)
@@ -238,3 +247,16 @@ class Categorical(Hyperparameter):
     def __repr__(self) -> str:
         text = f"Categorical({self._name}, choices={self._choices}, default={self._default}, weights={self._weights})"
         return text
+
+    def __getstate__(self) -> dict:
+        state = super().__getstate__()
+        state["choices"] = self._choices
+        state["distribution"] = self._distribution
+        state["weights"] = self._weights
+        return state
+
+    def __setstate__(self, state) -> dict:
+        super().__setstate__(state)
+        self._choices = state["choices"]
+        self._distribution = state["distribution"]
+        self._weights = state["weights"]

@@ -75,7 +75,10 @@ class HyperparameterConfigurationSpace(Mapping[str, Hyperparameter]):
         configurations = []
         for i in range(size):
             configurations += [
-                HyperparameterConfiguration({key: value.sample(self._random) for key, value in self._values.items()})
+                HyperparameterConfiguration(
+                    cs=self,
+                    values={key: value.sample(self._random) for key, value in self._values.items()}
+                )
             ]
         if size == 1:
             # Case: Return the single sample without the list element
@@ -89,7 +92,10 @@ class HyperparameterConfigurationSpace(Mapping[str, Hyperparameter]):
         Returns:
             HyperparameterConfiguration: configuration contains all default values for each hyperparameter
         """
-        return HyperparameterConfiguration({key: value.get_default() for key, value in self._values.items()})
+        return HyperparameterConfiguration(
+            cs=self,
+            values={key: value.get_default() for key, value in self._values.items()}
+        )
 
     def __contains__(self, key: Any) -> bool:
         return key in self._values
@@ -122,3 +128,13 @@ class HyperparameterConfigurationSpace(Mapping[str, Hyperparameter]):
         lines = [f"  '{key}': {repr(values[key])}," for key in sorted(values.keys())]
         end = "})"
         return "\n".join([header, *lines, end])
+
+    def __getstate__(self) -> dict:
+        return {
+            "values": self._values,
+            "random": self._random,
+        }
+
+    def __setstate__(self, state) -> dict:
+        self._values = state["values"]
+        self._random = state["random"]

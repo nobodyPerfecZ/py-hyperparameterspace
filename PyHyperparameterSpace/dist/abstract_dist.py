@@ -7,7 +7,6 @@ class Distribution(ABC):
     """
     Abstract class of a Distribution (necessary for the sampling procedure).
     """
-    pass
 
 
 class Normal(Distribution):

@@ -74,6 +74,14 @@ class Constant(Hyperparameter):
         else:
             return np.full(shape=sample_size, fill_value=self._default)
 
+    def valid_configuration(self, value: Any) -> bool:
+        if isinstance(value, (list, np.ndarray)):
+            # Case: value is multi-dimensional
+            return np.array_equal(self._default, value)
+        else:
+            # Case: value is single-dimensional
+            return self._default == value
+
     def __eq__(self, other: Any) -> bool:
         if isinstance(other, self.__class__):
             return hash(self) == hash(other)

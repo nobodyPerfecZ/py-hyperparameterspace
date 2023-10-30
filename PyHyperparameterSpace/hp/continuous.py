@@ -142,6 +142,17 @@ class Continuous(Hyperparameter, ABC):
         """
         pass
 
+    def __getstate__(self) -> dict:
+        state = super().__getstate__()
+        state["bounds"] = self._bounds
+        state["distribution"] = self._distribution
+        return state
+
+    def __setstate__(self, state):
+        super().__setstate__(state)
+        self._bounds = state["bounds"]
+        self._distribution = state["distribution"]
+
 
 class Float(Continuous):
     """
@@ -312,7 +323,17 @@ class Float(Continuous):
             sample = random.uniform(low=self.lb, high=self.ub, size=sample_size)
             return sample
         else:
-            raise Exception("#ERROR_FLOAT: Unknown Probability Distribution!")
+            raise Exception("Unknown Probability Distribution!")
+
+    def valid_configuration(self, value: Any) -> bool:
+        if isinstance(value, (list, np.ndarray)):
+            # Case: Value is multi-dimensional
+            value = np.array(value)
+            return np.all((self.lb <= value) & (value < self.ub)) and self._shape == value.shape
+        elif isinstance(value, (int, float)):
+            # Case: value is single-dimensional
+            return self.lb <= value < self.ub
+        return False
 
     def __eq__(self, other: Any) -> bool:
         if isinstance(other, self.__class__):
@@ -444,6 +465,17 @@ class Integer(Continuous):
             return sample
         else:
             raise Exception("Unknown Probability Distribution!")
+
+    def valid_configuration(self, value: Any) -> bool:
+        if isinstance(value, (list, np.ndarray)):
+            # Case: Value is multi-dimensional
+            value = np.array(value)
+            return np.all((self.lb <= value) & (value < self.ub)) and self._shape == value.shape
+        elif isinstance(value, int):
+            # Case: value is single-dimensional
+            return self.lb <= value < self.ub
+        else:
+            return False
 
     def __eq__(self, other: Any) -> bool:
         if isinstance(other, self.__class__):

@@ -1,5 +1,6 @@
 import unittest
 import numpy as np
+import yaml
 
 from PyHyperparameterSpace.hp.categorical import Categorical
 from PyHyperparameterSpace.dist.categorical import Choice
@@ -185,6 +186,13 @@ class TestCategorical(unittest.TestCase):
         self.assertEqual(self.size, len(sample5))
         self.assertTrue(s in self.choices for s in sample5)
 
+    def test_valid_configuration(self):
+        """
+        Tests the method valid_configuration().
+        """
+        self.assertTrue(self.hp.valid_configuration(self.default_X1))
+        self.assertFalse(self.hp.valid_configuration(self.default5))
+
     def test_eq(self):
         """
         Tests the magic function __eq__.
@@ -204,6 +212,21 @@ class TestCategorical(unittest.TestCase):
         self.assertNotEqual(hash(self.hp), hash(self.hp3))
         self.assertNotEqual(hash(self.hp), hash(self.hp4))
         self.assertNotEqual(hash(self.hp), hash(self.hp5))
+
+    def test_set_get_state(self):
+        """
+        Tests the magic functions __getstate__ and __setstate__.
+        """
+        # Safe the hyperparameter as yaml file
+        with open("test_data.yaml", "w") as yaml_file:
+            yaml.dump(self.hp, yaml_file)
+
+        # Load the hyperparameter from the yaml file
+        with open("test_data.yaml", "r") as yaml_file:
+            hp = yaml.load(yaml_file, Loader=yaml.Loader)
+
+        # Check if they are equal
+        self.assertEqual(hp, self.hp)
 
 
 if __name__ == '__main__':

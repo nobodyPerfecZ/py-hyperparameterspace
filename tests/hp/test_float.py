@@ -1,5 +1,6 @@
 import unittest
 import numpy as np
+import yaml
 
 from PyHyperparameterSpace.hp.continuous import Float
 from PyHyperparameterSpace.dist.continuous import MultivariateNormal, Normal, Uniform
@@ -247,8 +248,17 @@ class TestFloat(unittest.TestCase):
         multivariate_normal_sample = self.multivariate_normal_hp.sample(random=self.random, size=self.size)
         self.assertEqual(self.size, len(multivariate_normal_sample))
         self.assertEqual(self.shape3, multivariate_normal_sample[0].shape)
-        self.assertTrue(np.all((self.bounds[0] <= multivariate_normal_sample) & (multivariate_normal_sample < self.bounds[1])))
-        self.assertTrue(np.all((self.bounds[0] <= multivariate_normal_sample) & (multivariate_normal_sample < self.bounds[1])))
+        self.assertTrue(
+            np.all((self.bounds[0] <= multivariate_normal_sample) & (multivariate_normal_sample < self.bounds[1])))
+        self.assertTrue(
+            np.all((self.bounds[0] <= multivariate_normal_sample) & (multivariate_normal_sample < self.bounds[1])))
+
+    def test_valid_configuration(self):
+        """
+        Tests the method valid_configuration().
+        """
+        self.assertTrue(self.normal_hp.valid_configuration(self.default))
+        self.assertFalse(self.normal_hp.valid_configuration(self.default3))
 
     def test_eq(self):
         """
@@ -277,6 +287,21 @@ class TestFloat(unittest.TestCase):
         self.assertNotEqual(hash(self.uniform_hp), hash(self.uniform_hp3))
         self.assertNotEqual(hash(self.uniform_hp), hash(self.uniform_hp4))
         self.assertNotEqual(hash(self.uniform_hp), hash(self.multivariate_normal_hp))
+
+    def test_set_get_state(self):
+        """
+        Tests the magic functions __getstate__ and __setstate__.
+        """
+        # Safe the hyperparameter as yaml file
+        with open("test_data.yaml", "w") as yaml_file:
+            yaml.dump(self.normal_hp, yaml_file)
+
+        # Load the hyperparameter from the yaml file
+        with open("test_data.yaml", "r") as yaml_file:
+            hp = yaml.load(yaml_file, Loader=yaml.Loader)
+
+        # Check if they are equal
+        self.assertEqual(hp, self.normal_hp)
 
 
 if __name__ == '__main__':

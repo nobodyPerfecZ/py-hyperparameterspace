@@ -142,6 +142,21 @@ class Hyperparameter(ABC):
         pass
 
     @abstractmethod
+    def valid_configuration(self, value: Any) -> bool:
+        """
+        Checks if the given value is a valid configuration for the given hyperparameter.
+
+        Args:
+            value (Any):
+                The configuration you want to check.
+
+        Returns:
+            bool:
+                True if the configuration is valid for the given hyperparameter.
+        """
+        pass
+
+    @abstractmethod
     def __eq__(self, other: Any) -> bool:
         pass
 
@@ -152,6 +167,20 @@ class Hyperparameter(ABC):
     @abstractmethod
     def __repr__(self) -> str:
         pass
+
+    def __getstate__(self) -> dict:
+        """ Magic function to save a custom class as yaml file. """
+        return {
+            "name": self._name,
+            "default": self._default,
+            "shape": self._shape,
+        }
+
+    def __setstate__(self, state):
+        """ Magic function to load a custom class from yaml file. """
+        self._name = state["name"]
+        self._default = state["default"]
+        self._shape = state["shape"]
 
     @classmethod
     def _get_sample_size(
