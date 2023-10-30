@@ -57,15 +57,6 @@ class TestInteger(unittest.TestCase):
         self.assertEqual(self.bounds, self.hp3._bounds)
         self.assertEqual(self.bounds, self.hp4._bounds)
 
-    def test_choices(self):
-        """
-        Tests the property choices.
-        """
-        self.assertIsNone(self.hp._choices)
-        self.assertIsNone(self.hp2._choices)
-        self.assertIsNone(self.hp3._choices)
-        self.assertIsNone(self.hp4._choices)
-
     def test_default(self):
         """
         Tests the property default.
@@ -83,15 +74,6 @@ class TestInteger(unittest.TestCase):
         self.assertIsInstance(self.hp2._distribution, Uniform)
         self.assertIsInstance(self.hp3._distribution, Uniform)
         self.assertIsInstance(self.hp4._distribution, Uniform)
-
-    def test_weights(self):
-        """
-        Tests the property weights.
-        """
-        self.assertIsNone(self.hp._weights)
-        self.assertIsNone(self.hp2._weights)
-        self.assertIsNone(self.hp3._weights)
-        self.assertIsNone(self.hp4._weights)
 
     def test_lb(self):
         """
@@ -120,15 +102,6 @@ class TestInteger(unittest.TestCase):
         self.assertEqual(self.name, self.hp3.get_name())
         self.assertEqual(self.name, self.hp4.get_name())
 
-    def test_get_choices(self):
-        """
-        Tests the method get_choices().
-        """
-        self.assertIsNone(self.hp.get_choices())
-        self.assertIsNone(self.hp2.get_choices())
-        self.assertIsNone(self.hp3.get_choices())
-        self.assertIsNone(self.hp4.get_choices())
-
     def test_get_default(self):
         """
         Tests the method get_default().
@@ -146,6 +119,24 @@ class TestInteger(unittest.TestCase):
         self.assertEqual(self.shape2, self.hp2.get_shape())
         self.assertEqual(self.shape2, self.hp3.get_shape())
         self.assertEqual(self.shape2, self.hp4.get_shape())
+
+    def test_get_bounds(self):
+        """
+        Tests the method get_bounds().
+        """
+        self.assertEqual(self.bounds, self.hp.get_bounds())
+        self.assertEqual(self.bounds, self.hp2.get_bounds())
+        self.assertEqual(self.bounds, self.hp3.get_bounds())
+        self.assertEqual(self.bounds, self.hp4.get_bounds())
+
+    def test_get_distribution(self):
+        """
+        Tests the method get_distribution().
+        """
+        self.assertIsInstance(self.hp.get_distribution(), Uniform)
+        self.assertIsInstance(self.hp2.get_distribution(), Uniform)
+        self.assertIsInstance(self.hp3.get_distribution(), Uniform)
+        self.assertIsInstance(self.hp4.get_distribution(), Uniform)
 
     def test_sample(self):
         """

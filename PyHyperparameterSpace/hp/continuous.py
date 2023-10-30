@@ -1,4 +1,5 @@
 from typing import Union, Iterable, Any
+from abc import ABC, abstractmethod
 import numpy as np
 
 from PyHyperparameterSpace.dist.continuous import MultivariateNormal, Normal, Uniform
@@ -6,16 +7,161 @@ from PyHyperparameterSpace.hp.abstract_hp import Hyperparameter
 from PyHyperparameterSpace.dist.abstract_dist import Distribution
 
 
-class Float(Hyperparameter):
+class Continuous(Hyperparameter, ABC):
     """
-     Class to represent a floating hyperparameter.
+    Abstract class to represent a continuous/discrete Hyperparameter.
 
         Attributes:
-            name (str): name of the hyperparameter
-            bounds (Union[tuple[float, float], tuple[int, int]]): (lower, upper) bounds of hyperparameter
-            default (Any): default value of the hyperparameter
-            shape (Union[int, tuple[int, ...], None]): shape of the hyperparameter
-            distribution (Union[Distribution, None]): distribution from where we sample new values for hyperparameter
+            name (str):
+                Name of the hyperparameter
+
+            bounds (Union[tuple[int, int], tuple[float, float]]):
+                (lower, upper) bounds of hyperparameter
+
+            default (Any):
+                Default value of the hyperparameter
+
+            shape (Union[int, tuple[int, ...], None]):
+                Shape of the hyperparameter
+
+            distribution (Distribution):
+                Distribution from where we sample new values for hyperparameter
+    """
+
+    def __init__(
+            self,
+            name: str,
+            bounds: Union[tuple[int, int], tuple[float, float]],
+            default: Any = None,
+            shape: Union[int, tuple[int, ...], None] = None,
+            distribution: Union[Distribution, None] = Uniform(),
+    ):
+        # First set the variables
+        self._bounds = bounds
+        self._distribution = distribution
+
+        super().__init__(name=name, shape=shape, default=default)
+
+        # Then check the variables and set them again
+        self._bounds = self._check_bounds(bounds)
+        self._distribution = self._check_distribution(distribution)
+
+    @property
+    def lb(self) -> Union[int, float, None]:
+        """
+        Returns:
+            Union[int, float]:
+                Lower bound of the range
+        """
+        return self._bounds[0]
+
+    @property
+    def ub(self) -> Union[int, float]:
+        """
+        Returns:
+            Union[int, float]:
+                Upper bound of the range
+        """
+        return self._bounds[1]
+
+    def get_bounds(self) -> Union[tuple[int, int], tuple[float, float]]:
+        """
+        Returns:
+            Union[tuple[int, int], tuple[float, float]]:
+                Bounds of the value ranges (lower bound, upper bound)
+        """
+        return self._bounds
+
+    def get_distribution(self) -> Distribution:
+        """
+        Returns:
+            Distribution:
+                Distribution from where we sample
+        """
+        return self._distribution
+
+    @abstractmethod
+    def _check_bounds(self, bounds: Union[tuple[float, float], tuple[int, int]]) \
+            -> Union[tuple[float, float], tuple[int, int]]:
+        """
+        Check if the given bound is legal. A bound is called legal if it fulfills the format (lower, upper).
+
+        Args:
+            bounds (Union[tuple[int, int], tuple[float, float]]):
+                Bounds to check
+
+        Returns:
+            Union[tuple[int, int], tuple[float, float]]:
+                Legal bounds
+        """
+        pass
+
+    @abstractmethod
+    def _is_legal_bounds(self, bounds: Union[tuple[float, float], tuple[int, int]]):
+        """
+        Returns True if the given bounds fulfills the right format of (lower, upper).
+
+        Args:
+            bounds (Union[tuple[int, int], tuple[float, float]]):
+                Bounds to check
+
+        Returns:
+            bool:
+                True if given bounds are legal
+        """
+        pass
+
+    @abstractmethod
+    def _check_distribution(self, distribution: Distribution) -> Distribution:
+        """
+        Checks if the distribution is legal. A distribution is called legal, if the class of the distribution can be
+        used for the given hyperparameter class.
+
+        Args:
+            distribution (Distribution):
+                Distribution to check
+
+        Returns:
+            Distribution:
+                Legal distribution
+        """
+        pass
+
+    @abstractmethod
+    def _is_legal_distribution(self, distribution: Distribution) -> bool:
+        """
+        Returns True if the given distribution can be used for the given hyperparameter class.
+
+        Args:
+            distribution (Distribution):
+                Distribution to check
+
+        Returns:
+            bool:
+                True if the given distribution can be used for the hyperparameter class
+        """
+        pass
+
+
+class Float(Continuous):
+    """
+    Class to represent a floating hyperparameter.
+
+        Attributes:
+            name (str):
+                Name of the hyperparameter
+
+            bounds (Union[tuple[int, int], tuple[float, float]):
+                (lower, upper) bounds of hyperparameter
+
+            default (Any):
+                Default value of the hyperparameter
+
+            shape (Union[int, tuple[int, ...], None]):
+                Shape of the hyperparameter
+
+            distribution (Distribution):
+                Distribution from where we sample new values for hyperparameter
     """
 
     def __init__(
@@ -29,8 +175,7 @@ class Float(Hyperparameter):
         if isinstance(default, list):
             default = np.array(default, dtype=float)
 
-        super().__init__(name=name, shape=shape, bounds=bounds, choices=None, default=default,
-                         distribution=distribution, weights=None)
+        super().__init__(name=name, shape=shape, bounds=bounds, default=default, distribution=distribution)
 
     def _check_bounds(self, bounds: Union[tuple[float, float], tuple[int, int]]) \
             -> Union[tuple[float, float], tuple[int, int]]:
@@ -45,13 +190,6 @@ class Float(Hyperparameter):
             return True
         else:
             return False
-
-    def _check_choices(self, choices: Union[list[Any], None]) -> Union[list[Any], None]:
-        # Does not need to check weights, because float hyperparameters do not use them
-        return choices
-
-    def _is_legal_choices(self, choices: Union[list[Any], None]) -> bool:
-        raise Exception("Float hyperparameter does not have choices!")
 
     def _check_default(self, default: Union[int, float, np.ndarray]) -> Union[int, float, np.ndarray]:
         if default is None:
@@ -70,8 +208,8 @@ class Float(Hyperparameter):
 
     def _is_legal_default(self, default: Any) -> bool:
         if not isinstance(default, (float, int)) and \
-                not(isinstance(default, np.ndarray) and np.issubdtype(default.dtype, np.floating)) and \
-                not(isinstance(default, np.ndarray) and np.issubdtype(default.dtype, np.integer)):
+                not (isinstance(default, np.ndarray) and np.issubdtype(default.dtype, np.floating)) and \
+                not (isinstance(default, np.ndarray) and np.issubdtype(default.dtype, np.integer)):
             # Case: Default is not in the right format!
             return False
         if isinstance(default, (float, int)):
@@ -134,14 +272,6 @@ class Float(Hyperparameter):
             return True
         return False
 
-    def _check_weights(self, weights: Union[list[int], list[float], None]) -> Union[list[int], list[float], None]:
-        # Does not need to check weights, because float hyperparameters do not use them
-        return weights
-
-    def _is_legal_weights(self, weights: Union[list[int], list[float], None]) \
-            -> Union[tuple[int], tuple[float], None]:
-        raise Exception("Float hyperparameter does not have weights for choices!")
-
     def sample(self, random: np.random.RandomState, size: Union[int, None] = None) -> Any:
         if isinstance(self._distribution, MultivariateNormal):
             # Case: Sample from multivariate normal distribution
@@ -197,29 +327,36 @@ class Float(Hyperparameter):
         return text
 
 
-class Integer(Hyperparameter):
+class Integer(Continuous):
     """
-    Abstract class to represent a hyperparameter.
+    Class to represent a discrete hyperparameter.
 
         Attributes:
-            name (str): name of the hyperparameter
-            bounds (Union[tuple[int], tuple[float], None]): (lower, upper) bounds of hyperparameter
-            default (Any): default value of the hyperparameter
-            shape (Union[int, tuple[int, ...], None]): shape of the hyperparameter
+            name (str):
+                Name of the hyperparameter
+
+            bounds (tuple[int, int]):
+                (lower, upper) bounds of hyperparameter
+
+            default (Any):
+                Default value of the hyperparameter
+
+            shape (Union[int, tuple[int, ...], None]):
+                Shape of the hyperparameter
+
+            distribution (Distribution):
+                Distribution from where we sample new values for hyperparameter
     """
 
     def __init__(
             self,
             name: str,
-            bounds: Union[tuple[int, int], None],
+            bounds: Union[tuple[int, int]],
             default: Union[int, list, np.ndarray, None] = None,
             shape: Union[int, tuple[int, ...], None] = None,
+            distribution: Distribution = Uniform(),
     ):
-        if isinstance(default, list):
-            default = np.array(default)
-
-        super().__init__(name=name, shape=shape, bounds=bounds, choices=None, default=default, distribution=Uniform(),
-                         weights=None)
+        super().__init__(name=name, shape=shape, bounds=bounds, default=default, distribution=distribution)
 
     def _check_bounds(self, bounds: Union[tuple[int, int], None]) -> Union[tuple[int], tuple[float], None]:
         if self._is_legal_bounds(bounds):
@@ -233,13 +370,6 @@ class Integer(Hyperparameter):
             return True
         else:
             return False
-
-    def _check_choices(self, choices: Union[list[Any], None]) -> Union[list[Any], None]:
-        # Does not need to check weights, because float hyperparameters do not use them
-        return choices
-
-    def _is_legal_choices(self, choices: Union[list[Any], None]) -> bool:
-        raise Exception("Integer hyperparameter does not have choices!")
 
     def _check_default(self, default: Union[int, np.ndarray]) -> Union[int, np.ndarray]:
         if default is None:
@@ -258,7 +388,7 @@ class Integer(Hyperparameter):
 
     def _is_legal_default(self, default: Union[int, np.ndarray]) -> bool:
         if not isinstance(default, int) and \
-                not(isinstance(default, np.ndarray) and np.issubdtype(default.dtype, np.integer)):
+                not (isinstance(default, np.ndarray) and np.issubdtype(default.dtype, np.integer)):
             # Case: Default is not in the right format!
             return False
         if isinstance(default, int):
@@ -307,20 +437,13 @@ class Integer(Hyperparameter):
             return True
         return False
 
-    def _check_weights(self, weights: Union[tuple[int], tuple[float], None]) -> Union[tuple[int], tuple[float], None]:
-        # Does not need to check weights, because float hyperparameters do not use them
-        return weights
-
-    def _is_legal_weights(self, weights: Union[tuple[int], tuple[float], None]) -> bool:
-        raise Exception("Integer hyperparameter does not have weights for choices!")
-
     def sample(self, random: np.random.RandomState, size: Union[int, None] = None) -> Any:
         if isinstance(self._distribution, Uniform):
-            sample_size = Float._get_sample_size(size=size, shape=self._shape)
+            sample_size = Integer._get_sample_size(size=size, shape=self._shape)
             sample = random.randint(low=self.lb, high=self.ub, size=sample_size)
             return sample
         else:
-            raise Exception("#ERROR_INTEGER: Unknown Probability Distribution!")
+            raise Exception("Unknown Probability Distribution!")
 
     def __eq__(self, other: Any) -> bool:
         if isinstance(other, self.__class__):

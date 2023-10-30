@@ -50,7 +50,8 @@ class TestFloat(unittest.TestCase):
         # Tests with shape=None
         self.uniform_hp4 = Float(name=self.name, shape=None, bounds=self.bounds, default=self.default2,
                                  distribution=self.uniform_distribution)
-        # TODO: Add some tests here
+
+        # Tests with multivariate normal distribution
         self.multivariate_normal_hp = Float(name=self.name, shape=None, bounds=self.bounds, default=self.default4,
                                             distribution=self.multivariate_normal_distribution)
 
@@ -96,20 +97,6 @@ class TestFloat(unittest.TestCase):
         self.assertEqual(self.bounds, self.uniform_hp4._bounds)
         self.assertEqual(self.bounds, self.multivariate_normal_hp._bounds)
 
-    def test_choices(self):
-        """
-        Tests the property choices.
-        """
-        self.assertIsNone(self.normal_hp._choices)
-        self.assertIsNone(self.normal_hp2._choices)
-        self.assertIsNone(self.normal_hp3._choices)
-        self.assertIsNone(self.normal_hp4._choices)
-        self.assertIsNone(self.uniform_hp._choices)
-        self.assertIsNone(self.uniform_hp2._choices)
-        self.assertIsNone(self.uniform_hp3._choices)
-        self.assertIsNone(self.uniform_hp4._choices)
-        self.assertIsNone(self.multivariate_normal_hp._choices)
-
     def test_default(self):
         """
         Tests the property default.
@@ -137,20 +124,6 @@ class TestFloat(unittest.TestCase):
         self.assertIsInstance(self.uniform_hp3._distribution, Uniform)
         self.assertIsInstance(self.uniform_hp4._distribution, Uniform)
         self.assertIsInstance(self.multivariate_normal_hp._distribution, MultivariateNormal)
-
-    def test_weights(self):
-        """
-        Tests the property weights.
-        """
-        self.assertIsNone(self.normal_hp._weights)
-        self.assertIsNone(self.normal_hp2._weights)
-        self.assertIsNone(self.normal_hp3._weights)
-        self.assertIsNone(self.normal_hp4._weights)
-        self.assertIsNone(self.uniform_hp._weights)
-        self.assertIsNone(self.uniform_hp2._weights)
-        self.assertIsNone(self.uniform_hp3._weights)
-        self.assertIsNone(self.uniform_hp4._weights)
-        self.assertIsNone(self.multivariate_normal_hp._weights)
 
     def test_lb(self):
         """
@@ -193,20 +166,6 @@ class TestFloat(unittest.TestCase):
         self.assertEqual(self.name, self.uniform_hp3.get_name())
         self.assertEqual(self.name, self.uniform_hp4.get_name())
 
-    def test_get_choices(self):
-        """
-        Tests the method get_choices().
-        """
-        self.assertIsNone(self.normal_hp.get_choices())
-        self.assertIsNone(self.normal_hp2.get_choices())
-        self.assertIsNone(self.normal_hp3.get_choices())
-        self.assertIsNone(self.normal_hp4.get_choices())
-        self.assertIsNone(self.uniform_hp.get_choices())
-        self.assertIsNone(self.uniform_hp2.get_choices())
-        self.assertIsNone(self.uniform_hp3.get_choices())
-        self.assertIsNone(self.uniform_hp4.get_choices())
-        self.assertIsNone(self.multivariate_normal_hp.get_choices())
-
     def test_get_default(self):
         """
         Tests the method get_default().
@@ -234,6 +193,34 @@ class TestFloat(unittest.TestCase):
         self.assertEqual(self.shape2, self.uniform_hp3.get_shape())
         self.assertEqual(self.shape2, self.uniform_hp4.get_shape())
         self.assertEqual(self.shape3, self.multivariate_normal_hp.get_shape())
+
+    def test_get_bounds(self):
+        """
+        Tests the method get_bounds().
+        """
+        self.assertEqual(self.bounds, self.normal_hp.get_bounds())
+        self.assertEqual(self.bounds, self.normal_hp2.get_bounds())
+        self.assertEqual(self.bounds, self.normal_hp3.get_bounds())
+        self.assertEqual(self.bounds, self.normal_hp4.get_bounds())
+        self.assertEqual(self.bounds, self.uniform_hp.get_bounds())
+        self.assertEqual(self.bounds, self.uniform_hp2.get_bounds())
+        self.assertEqual(self.bounds, self.uniform_hp3.get_bounds())
+        self.assertEqual(self.bounds, self.uniform_hp4.get_bounds())
+        self.assertEqual(self.bounds, self.multivariate_normal_hp.get_bounds())
+
+    def test_get_distribution(self):
+        """
+        Tests the method get_distribution().
+        """
+        self.assertIsInstance(self.normal_hp.get_distribution(), Normal)
+        self.assertIsInstance(self.normal_hp2.get_distribution(), Normal)
+        self.assertIsInstance(self.normal_hp3.get_distribution(), Normal)
+        self.assertIsInstance(self.normal_hp4.get_distribution(), Normal)
+        self.assertIsInstance(self.uniform_hp.get_distribution(), Uniform)
+        self.assertIsInstance(self.uniform_hp2.get_distribution(), Uniform)
+        self.assertIsInstance(self.uniform_hp3.get_distribution(), Uniform)
+        self.assertIsInstance(self.uniform_hp4.get_distribution(), Uniform)
+        self.assertIsInstance(self.multivariate_normal_hp.get_distribution(), MultivariateNormal)
 
     def test_sample(self):
         """

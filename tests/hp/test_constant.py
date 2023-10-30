@@ -44,24 +44,6 @@ class TestConstant(unittest.TestCase):
         self.assertEqual(self.shape3, self.hp3._shape)
         self.assertEqual(self.shape3, self.hp4._shape)
 
-    def test_bounds(self):
-        """
-        Tests the property bounds.
-        """
-        self.assertIsNone(self.hp._bounds)
-        self.assertIsNone(self.hp2._bounds)
-        self.assertIsNone(self.hp3._bounds)
-        self.assertIsNone(self.hp4._bounds)
-
-    def test_choices(self):
-        """
-        Tests the property choices.
-        """
-        self.assertIsNone(self.hp._choices)
-        self.assertIsNone(self.hp2._choices)
-        self.assertIsNone(self.hp3._choices)
-        self.assertIsNone(self.hp4._choices)
-
     def test_default(self):
         """
         Tests the property default.
@@ -71,42 +53,6 @@ class TestConstant(unittest.TestCase):
         self.assertTrue(np.all(self.default3 == self.hp3._default))
         self.assertTrue(np.all(self.default3 == self.hp4._default))
 
-    def test_distribution(self):
-        """
-        Tests the property distribution.
-        """
-        self.assertIsNone(self.hp._distribution)
-        self.assertIsNone(self.hp2._distribution)
-        self.assertIsNone(self.hp3._distribution)
-        self.assertIsNone(self.hp4._distribution)
-
-    def test_weights(self):
-        """
-        Tests the property weights.
-        """
-        self.assertIsNone(self.hp._weights)
-        self.assertIsNone(self.hp2._weights)
-        self.assertIsNone(self.hp3._weights)
-        self.assertIsNone(self.hp4._weights)
-
-    def test_lb(self):
-        """
-        Tests the property lb.
-        """
-        self.assertIsNone(self.hp.lb)
-        self.assertIsNone(self.hp2.lb)
-        self.assertIsNone(self.hp3.lb)
-        self.assertIsNone(self.hp4.lb)
-
-    def test_ub(self):
-        """
-        Tests the property ub.
-        """
-        self.assertIsNone(self.hp.ub)
-        self.assertIsNone(self.hp2.ub)
-        self.assertIsNone(self.hp3.ub)
-        self.assertIsNone(self.hp4.ub)
-
     def test_get_name(self):
         """
         Tests the method get_name().
@@ -115,15 +61,6 @@ class TestConstant(unittest.TestCase):
         self.assertEqual(self.name, self.hp2.get_name())
         self.assertEqual(self.name, self.hp3.get_name())
         self.assertEqual(self.name, self.hp4.get_name())
-
-    def test_get_choices(self):
-        """
-        Tests the method get_choices().
-        """
-        self.assertIsNone(self.hp.get_choices())
-        self.assertIsNone(self.hp2.get_choices())
-        self.assertIsNone(self.hp3.get_choices())
-        self.assertIsNone(self.hp4.get_choices())
 
     def test_get_default(self):
         """

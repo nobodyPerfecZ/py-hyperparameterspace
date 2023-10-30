@@ -15,11 +15,13 @@ class TestCategorical(unittest.TestCase):
         self.shape = (1,)
         self.shape5 = (2, 2)
         self.choices = ["X1", "X2", "X3", "X4", "X5"]
-        self.choices5 = [np.array([["X1", "X2"], ["X3", "X4"]]), np.array([["X2", "X3"], ["X4", "X1"]]), np.array([["X3", "X4"], ["X1", "X2"]])]
+        self.choices5 = [np.array([["X1", "X2"], ["X3", "X4"]]), np.array([["X2", "X3"], ["X4", "X1"]]),
+                         np.array([["X3", "X4"], ["X1", "X2"]])]
         self.default_X1 = "X1"
         self.default_X3 = "X3"
         self.default_X5 = "X5"
         self.default5 = np.array([["X2", "X3"], ["X4", "X1"]])
+        self.distribution = Choice()
         self.weights = [0.1, 0.1, 0.2, 0.1, 0.5]
         self.weights_uniform = [0.2, 0.2, 0.2, 0.2, 0.2]
         self.weights5 = [0.3, 0.4, 0.3]
@@ -27,9 +29,10 @@ class TestCategorical(unittest.TestCase):
         self.size = 10
 
         # Tests with all options given
-        self.hp = Categorical(name=self.name, choices=self.choices, default=self.default_X3, weights=self.weights)
+        self.hp = Categorical(name=self.name, choices=self.choices, default=self.default_X3, distribution=self.distribution, weights=self.weights)
         # Tests with default=None
-        self.hp2 = Categorical(name=self.name, choices=self.choices, default=None, weights=self.weights)
+        self.hp2 = Categorical(name=self.name, choices=self.choices, default=None,
+                               distribution=self.distribution, weights=self.weights)
         # Tests with weights=None
         self.hp3 = Categorical(name=self.name, choices=self.choices, default=self.default_X3, weights=None)
         # Tests with default=None, weights=None
@@ -57,16 +60,6 @@ class TestCategorical(unittest.TestCase):
         self.assertEqual(self.shape, self.hp3._shape)
         self.assertEqual(self.shape, self.hp4._shape)
         self.assertEqual(self.shape5, self.hp5._shape)
-
-    def test_bounds(self):
-        """
-        Tests the property bounds.
-        """
-        self.assertIsNone(self.hp._bounds)
-        self.assertIsNone(self.hp2._bounds)
-        self.assertIsNone(self.hp3._bounds)
-        self.assertIsNone(self.hp4._bounds)
-        self.assertIsNone(self.hp5._bounds)
 
     def test_choices(self):
         """
@@ -108,26 +101,6 @@ class TestCategorical(unittest.TestCase):
         self.assertEqual(self.weights_uniform, self.hp4._weights)
         self.assertEqual(self.weights5, self.hp5._weights)
 
-    def test_lb(self):
-        """
-        Tests the property lb.
-        """
-        self.assertIsNone(self.hp.lb)
-        self.assertIsNone(self.hp2.lb)
-        self.assertIsNone(self.hp3.lb)
-        self.assertIsNone(self.hp4.lb)
-        self.assertIsNone(self.hp5.lb)
-
-    def test_ub(self):
-        """
-        Tests the property ub.
-        """
-        self.assertIsNone(self.hp.ub)
-        self.assertIsNone(self.hp2.ub)
-        self.assertIsNone(self.hp3.ub)
-        self.assertIsNone(self.hp4.ub)
-        self.assertIsNone(self.hp5.ub)
-
     def test_get_name(self):
         """
         Tests the method get_name().
@@ -137,16 +110,6 @@ class TestCategorical(unittest.TestCase):
         self.assertEqual(self.name, self.hp3.get_name())
         self.assertEqual(self.name, self.hp4.get_name())
         self.assertEqual(self.name, self.hp5.get_name())
-
-    def test_get_choices(self):
-        """
-        Tests the method get_choices().
-        """
-        self.assertEqual(self.choices, self.hp.get_choices())
-        self.assertEqual(self.choices, self.hp2.get_choices())
-        self.assertEqual(self.choices, self.hp3.get_choices())
-        self.assertEqual(self.choices, self.hp4.get_choices())
-        self.assertEqual(self.choices5, self.hp5.get_choices())
 
     def test_get_default(self):
         """
@@ -167,6 +130,36 @@ class TestCategorical(unittest.TestCase):
         self.assertEqual(self.shape, self.hp3.get_shape())
         self.assertEqual(self.shape, self.hp4.get_shape())
         self.assertEqual(self.shape5, self.hp5.get_shape())
+
+    def test_get_choices(self):
+        """
+        Tests the method get_choices().
+        """
+        self.assertEqual(self.choices, self.hp.get_choices())
+        self.assertEqual(self.choices, self.hp2.get_choices())
+        self.assertEqual(self.choices, self.hp3.get_choices())
+        self.assertEqual(self.choices, self.hp4.get_choices())
+        self.assertEqual(self.choices5, self.hp5.get_choices())
+
+    def test_get_distribution(self):
+        """
+        Tests the method get_distribution().
+        """
+        self.assertIsInstance(self.hp._distribution, Choice)
+        self.assertIsInstance(self.hp2._distribution, Choice)
+        self.assertIsInstance(self.hp3._distribution, Choice)
+        self.assertIsInstance(self.hp4._distribution, Choice)
+        self.assertIsInstance(self.hp5._distribution, Choice)
+
+    def test_get_weights(self):
+        """
+        Tests the method get_weights().
+        """
+        self.assertEqual(self.weights, self.hp.get_weights())
+        self.assertEqual(self.weights, self.hp2.get_weights())
+        self.assertEqual(self.weights_uniform, self.hp3.get_weights())
+        self.assertEqual(self.weights_uniform, self.hp4.get_weights())
+        self.assertEqual(self.weights5, self.hp5.get_weights())
 
     def test_sample(self):
         """

@@ -14,6 +14,7 @@ class Categorical(Hyperparameter):
             name (str): name of the hyperparameter
             choices (Union[list[Any], None]): all possible discrete values of hyperparameter
             default (Any): default value of the hyperparameter
+            distribution (Union[Distribution], None]): distribution from where we sample new values for hyperparameter
             weights (Union[tuple[int], tuple[float], None]): probability distribution for each possible discrete value
     """
 
@@ -23,26 +24,75 @@ class Categorical(Hyperparameter):
             choices: list[Any],
             default: Union[Any, None] = None,
             shape: Union[int, tuple[int, ...], None] = None,
+            distribution: Union[Distribution] = Choice(),
             weights: Union[list[int], list[float], None] = None,
     ):
-        super().__init__(name=name, shape=shape, bounds=None, choices=choices, default=default, distribution=Choice(),
-                         weights=weights)
+        # First set the variables
+        self._choices = choices
+        self._distribution = distribution
+        self._weights = weights
 
-    def _check_bounds(self, bounds: Union[tuple[int, int], tuple[float, float], None]) \
-            -> Union[tuple[int, int], tuple[float, float], None]:
-        return bounds
+        super().__init__(name=name, shape=shape, default=default)
 
-    def _is_legal_bounds(self, bounds: Union[tuple[int, int], tuple[float, float], None]) -> bool:
-        raise Exception("Constant hyperparameter does not have bounds!")
+        # Then check the variables and set them again
+        self._choices = self._check_choices(choices)
+        self._distribution = self._check_distribution(distribution)
+        self._weights = self._check_weights(weights)
 
-    def _check_choices(self, choices: Union[list[Any], None]) -> Union[list[Any], None]:
+    def get_choices(self) -> list[str]:
+        """
+        Returns:
+            list[str]:
+                List of choices
+        """
+        return self._choices
+
+    def get_distribution(self) -> Distribution:
+        """
+        Returns:
+            Distribution:
+                Distribution from where we sample
+        """
+        return self._distribution
+
+    def get_weights(self) -> list[float]:
+        """
+        Returns:
+            list[float]:
+                List of weights for each choice
+        """
+        return self._weights
+
+    def _check_choices(self, choices: list[Any]) -> list[Any]:
+        """
+        Checks if the given choices are legal. A choice is called legal, if it fulfills the format [item1, item2, ...]
+
+        Args:
+            choices (list[Any]):
+                Choices to check
+
+        Returns:
+            list[Any]:
+                Legal choices
+        """
         if self._is_legal_choices(choices):
             return choices
         else:
             raise Exception(f"Illegal choices {choices}!")
 
     def _is_legal_choices(self, choices: Union[list[Any], None]) -> bool:
-        if isinstance(choices, list) and len(choices) > 1:
+        """
+        Returns True if the given choices fulfills the format [item1, item2, ...].
+
+        Args:
+            choices (Union[list[Any], None]):
+                Choices to check
+
+        Returns:
+            bool:
+                True, if given choices is legal
+        """
+        if isinstance(choices, (list, np.ndarray)) and len(choices) > 1:
             return True
         else:
             return False
@@ -61,7 +111,7 @@ class Categorical(Hyperparameter):
             raise Exception(f"Illegal default value {default}!")
 
     def _is_legal_default(self, default: Union[Any, None]) -> bool:
-        if isinstance(default, np.ndarray):
+        if isinstance(default, (list, np.ndarray)):
             return any(np.array_equal(default, choice) for choice in self._choices)
         else:
             return default in self._choices
@@ -82,7 +132,7 @@ class Categorical(Hyperparameter):
         if shape == 1 or shape == (1,):
             if isinstance(self._default, (int, float, bool, str)):
                 return True
-        elif isinstance(shape, (int, float, bool, str)):
+        elif isinstance(shape, int):
             if isinstance(self._default, np.ndarray) and shape == len(self._default):
                 return True
         elif isinstance(shape, tuple) and all(isinstance(s, int) for s in shape):
@@ -90,19 +140,58 @@ class Categorical(Hyperparameter):
                 return True
         return False
 
-    def _check_distribution(self, distribution: Union[Distribution, None]) -> Union[Distribution, None]:
+    def _check_distribution(self, distribution: Distribution) -> Distribution:
+        """
+        Checks if the distribution is legal. A distribution is called legal, if the class of the distribution can be
+        used for the given hyperparameter class.
+
+        Args:
+            distribution (Distribution):
+                Distribution to check
+
+        Returns:
+            Distribution:
+                Legal distribution
+        """
         if self._is_legal_distribution(distribution):
             return distribution
         else:
             raise Exception(f"Illegal distribution {distribution}")
 
-    def _is_legal_distribution(self, distribution: Union[Distribution, None]) -> bool:
+    def _is_legal_distribution(self, distribution: Distribution) -> bool:
+        """
+        Returns True if the given distribution can be used for the given hyperparameter class.
+
+        Args:
+            distribution (Distribution):
+                distribution to check
+
+        Returns:
+            bool:
+                True if the given distribution can be used for the hyperparameter class
+        """
         if isinstance(distribution, Choice):
             return True
         else:
             return False
 
     def _check_weights(self, weights: Union[list[int], list[float], None]) -> Union[list[int], list[float]]:
+        """
+        Checks if the given weights are legal. Weights are called legal, if (...)
+            - fulfills the right format [w1, w2, ...]
+            - length of weights and choices are equal
+            - for all w_i >= 0
+
+        and normalizes the weights to a probability distribution.
+
+        Args:
+            weights (Union[list[int], list[float], None]):
+                Weights to check
+
+        Returns:
+            Union[list[int], list[float], None]:
+                Normalized weights
+        """
         if weights is None:
             return Categorical._normalize([1 for _ in range(len(self._choices))])
         elif self._is_legal_weights(weights):
@@ -111,7 +200,21 @@ class Categorical(Hyperparameter):
             raise Exception(f"Illegal weights {weights}")
 
     def _is_legal_weights(self, weights: Union[list[int], list[float], None]) -> bool:
-        if isinstance(weights, list) and len(weights) == len(self._choices) and all(0 <= w for w in weights):
+        """
+        Returns True if the given weights (...)
+            - fulfills the right format [w1, w2, ...]
+            - length of weights and choices are equal
+            - for all w_i >= 0
+
+        Args:
+            weights (Union[list[int], list[float], None]):
+                Weights to check
+
+        Returns:
+            bool:
+                True if weights are legal
+        """
+        if isinstance(weights, (list, np.ndarray)) and len(weights) == len(self._choices) and all(0 <= w for w in weights):
             return True
         return False
 
@@ -122,7 +225,7 @@ class Categorical(Hyperparameter):
                 indices = [indices]
             return np.array([self._choices[idx] for idx in indices])
         else:
-            raise Exception("#ERROR_CATEGORICAL: Unknown Probability Distribution!")
+            raise Exception(f"Unknown Probability Distribution {self._distribution}!")
 
     def __eq__(self, other: Any) -> bool:
         if isinstance(other, self.__class__):
