@@ -3,6 +3,7 @@ import numpy as np
 import yaml
 
 from PyHyperparameterSpace.space import HyperparameterConfigurationSpace
+from PyHyperparameterSpace.space import HyperparameterConfiguration
 from PyHyperparameterSpace.hp.continuous import Float, Integer
 from PyHyperparameterSpace.hp.categorical import Categorical
 from PyHyperparameterSpace.hp.constant import Constant
@@ -68,19 +69,31 @@ class TestHyperparameterConfigurationSpace(unittest.TestCase):
         """
         Tests the method sample_configuration().
         """
-        configs = self.cs.sample_configuration(size=self.size)
-        self.assertEqual(self.size, len(configs))
+        configs = self.cs.sample_configuration()
+        configs2 = self.cs.sample_configuration(size=self.size)
+
+        self.assertIsInstance(configs, HyperparameterConfiguration)
+
+        self.assertIsInstance(configs2, list)
+        self.assertEqual(self.size, len(configs2))
 
     def test_get_default_configuration(self):
         """
         Tests the method get_default_configuration().
         """
-        config = self.cs.get_default_configuration()
-        self.assertEqual(2.25, config["X1"])
-        self.assertEqual(True, config["X2"])
-        self.assertEqual(-5, config["X3"])
-        self.assertEqual("attr1", config["X4"])
-        self.assertEqual("X_Const", config["X5"])
+        configs = self.cs.get_default_configuration()
+        configs2 = self.cs.get_default_configuration(size=10)
+
+        self.assertIsInstance(configs, HyperparameterConfiguration)
+        self.assertEqual(2.25, configs["X1"])
+        self.assertEqual(True, configs["X2"])
+        self.assertEqual(-5, configs["X3"])
+        self.assertEqual("attr1", configs["X4"])
+        self.assertEqual("X_Const", configs["X5"])
+
+        self.assertIsInstance(configs2, list)
+        self.assertEqual(self.size, len(configs2))
+        self.assertTrue(all(configs == cfg for cfg in configs2))
 
     def test_contains(self):
         """
