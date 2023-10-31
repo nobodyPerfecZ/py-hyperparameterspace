@@ -66,11 +66,11 @@ class TestCategorical(unittest.TestCase):
         """
         Tests the property choices.
         """
-        self.assertEqual(self.choices, self.hp._choices)
-        self.assertEqual(self.choices, self.hp2._choices)
-        self.assertEqual(self.choices, self.hp3._choices)
-        self.assertEqual(self.choices, self.hp4._choices)
-        self.assertEqual(self.choices5, self.hp5._choices)
+        self.assertTrue(np.array_equal(self.choices, self.hp._choices))
+        self.assertTrue(np.array_equal(self.choices, self.hp2._choices))
+        self.assertTrue(np.array_equal(self.choices, self.hp3._choices))
+        self.assertTrue(np.array_equal(self.choices, self.hp4._choices))
+        self.assertTrue(np.array_equal(self.choices5, self.hp5._choices))
 
     def test_default(self):
         """
@@ -96,11 +96,11 @@ class TestCategorical(unittest.TestCase):
         """
         Tests the property weights.
         """
-        self.assertEqual(self.weights, self.hp._weights)
-        self.assertEqual(self.weights, self.hp2._weights)
-        self.assertEqual(self.weights_uniform, self.hp3._weights)
-        self.assertEqual(self.weights_uniform, self.hp4._weights)
-        self.assertEqual(self.weights5, self.hp5._weights)
+        self.assertTrue(np.array_equal(self.weights, self.hp._weights))
+        self.assertTrue(np.array_equal(self.weights, self.hp2._weights))
+        self.assertTrue(np.array_equal(self.weights_uniform, self.hp3._weights))
+        self.assertTrue(np.array_equal(self.weights_uniform, self.hp4._weights))
+        self.assertTrue(np.array_equal(self.weights5, self.hp5._weights))
 
     def test_get_name(self):
         """
@@ -136,11 +136,11 @@ class TestCategorical(unittest.TestCase):
         """
         Tests the method get_choices().
         """
-        self.assertEqual(self.choices, self.hp.get_choices())
-        self.assertEqual(self.choices, self.hp2.get_choices())
-        self.assertEqual(self.choices, self.hp3.get_choices())
-        self.assertEqual(self.choices, self.hp4.get_choices())
-        self.assertEqual(self.choices5, self.hp5.get_choices())
+        self.assertTrue(np.array_equal(self.choices, self.hp.get_choices()))
+        self.assertTrue(np.array_equal(self.choices, self.hp2.get_choices()))
+        self.assertTrue(np.array_equal(self.choices, self.hp3.get_choices()))
+        self.assertTrue(np.array_equal(self.choices, self.hp4.get_choices()))
+        self.assertTrue(np.array_equal(self.choices5, self.hp5.get_choices()))
 
     def test_get_distribution(self):
         """
@@ -156,11 +156,11 @@ class TestCategorical(unittest.TestCase):
         """
         Tests the method get_weights().
         """
-        self.assertEqual(self.weights, self.hp.get_weights())
-        self.assertEqual(self.weights, self.hp2.get_weights())
-        self.assertEqual(self.weights_uniform, self.hp3.get_weights())
-        self.assertEqual(self.weights_uniform, self.hp4.get_weights())
-        self.assertEqual(self.weights5, self.hp5.get_weights())
+        self.assertTrue(np.array_equal(self.weights, self.hp.get_weights()))
+        self.assertTrue(np.array_equal(self.weights, self.hp2.get_weights()))
+        self.assertTrue(np.array_equal(self.weights_uniform, self.hp3.get_weights()))
+        self.assertTrue(np.array_equal(self.weights_uniform, self.hp4.get_weights()))
+        self.assertTrue(np.array_equal(self.weights5, self.hp5.get_weights()))
 
     def test_sample(self):
         """

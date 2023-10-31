@@ -15,12 +15,12 @@ In the following, we want to manage the following hyperparameters for our HPO ta
 
 PyHyperparameterSpace classifies each Hyperparameter in the following categories:
 
-| Type of Hyperparameter | Explanation                                                              |  
-|:-----------------------|:-------------------------------------------------------------------------|
-| Float()                | Discrete and continuous values as possible values for the hyperparameter | 
-| Integer()              | Only discrete values as possible values for the hyperparameter           |
-| Categorical()          | Only categorical values as possible values for the hyperparameter        |
-| Constant()             | hyperparameter where the values does not get changed                     |
+| Type of Hyperparameter | Explanation                             | Example                                                 |
+|:-----------------------|:----------------------------------------|:--------------------------------------------------------|
+| Float                  | Values are in the real number domain    | learning rate of an optimizer (lr)                      |
+| Integer                | Values are in the natural number domain | number of layers (n_layers)                             |
+| Categorical            | Values are in a set of choices          | type of the optimizer to use (optimizer_type)           |
+| Constant               | Single unchanged value                  | number of epochs to train a NN model (number_of_epochs) |
 
 
 Let's define our HyperparameterConfigurationSpace from the example:
@@ -33,16 +33,15 @@ from PyHyperparameterSpace.dist.continuous import Normal
 
 cs = HyperparameterConfigurationSpace(
     values={
-        "lr": Float("lr", bounds=(0.0001, 0.01), default=0.01, distribution=Normal(0.005, 0.01)),
+        "lr": Float("lr", bounds=(1e-4, 1e-2), default=1e-3, distribution=Normal(0.005, 0.01)),
         "n_layers": Integer("n_layers", bounds=(1, 6), default=3),
         "optimizer_type": Categorical("optimizer_type", choices=["adam", "adamw", "sgd"], default="adam"),
         "number_of_epochs": Constant("number_of_epochs", default=20),
     }
 )
-cs.get_default_configuration()
 ```
 
-With the given HyperparameterConfigurationSpace we can now sample Hyperparameters randomly by using the method 
+With the given HyperparameterConfigurationSpace, we can now sample hyperparameters randomly by using the method 
 `sample_configuration()`:
 
 ```python
@@ -56,7 +55,7 @@ default_cfg = cs.get_default_configuration()
 
 ### Additional Features
 
-Additionally, you can add a random number seed (e. g.: seed=1234) to reproduce the sampling procedure:
+Additionally, you can add a random number seed to reproduce the sampling procedure:
 ```python
 from PyHyperparameterSpace.space import HyperparameterConfigurationSpace
 from PyHyperparameterSpace.hp.continuous import Float, Integer
@@ -66,7 +65,7 @@ from PyHyperparameterSpace.dist.continuous import Normal
 
 cs = HyperparameterConfigurationSpace(
     values={
-        "lr": Float("lr", bounds=(0.0001, 0.01), default=0.01, distribution=Normal(0.005, 0.01)),
+        "lr": Float("lr", bounds=(1e-4, 1e-2), default=1e-3, distribution=Normal(0.005, 0.01)),
         "n_layers": Integer("n_layers", bounds=(1, 6), default=3),
         "optimizer_type": Categorical("optimizer_type", choices=["adam", "adamw", "sgd"], default="adam"),
         "number_of_epochs": Constant("number_of_epochs", default=20),
@@ -75,8 +74,7 @@ cs = HyperparameterConfigurationSpace(
 )
 ```
 
-For Float(), Integer() and Constant() it is possible to also create Hyperparameters where the values are matrices 
-instead of single values:
+It is also possible to create hyperparameters with multidimensional values instead of single dimensional values:
 
 ```python
 from PyHyperparameterSpace.space import HyperparameterConfigurationSpace
@@ -84,13 +82,13 @@ from PyHyperparameterSpace.hp.continuous import Float, Integer
 from PyHyperparameterSpace.hp.categorical import Categorical
 from PyHyperparameterSpace.hp.constant import Constant
 from PyHyperparameterSpace.dist.continuous import Uniform
-import numpy as np
 
 cs = HyperparameterConfigurationSpace(
     values={
-        "weights1": Float("weights1", bounds=(-1.0, 1.0), default=np.array([[0.0, 0.1], [0.2, 0.3]]), distribution=Uniform()),
-        "weights2": Integer("weights2", bounds=(1, 6), default=np.array([[1, 2], [3, 4]])),
-        "weights3": Constant("weights3", default=np.array([[True, False], [True, True]])),
+        "hp1": Float("hp1", bounds=(-1.0, 1.0), default=[[0.0, 0.1], [0.2, 0.3]], distribution=Uniform()),
+        "hp2": Integer("hp2", bounds=(1, 6), default=[[1, 2], [3, 4]]),
+        "hp3": Categorical("hp3", choices=[["adam", "use_weight_decay"], ["adamw", "use_weight_decay"], ["sgd", "no_weight_decay"]]),
+        "hp4": Constant("hp4", default=[[True, False], [True, True]]),
     }
 )
 ```

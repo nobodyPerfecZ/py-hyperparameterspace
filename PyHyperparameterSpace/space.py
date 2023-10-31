@@ -55,7 +55,7 @@ class HyperparameterConfigurationSpace(Mapping[str, Hyperparameter]):
         # TODO: Implement here the conditions
         raise NotImplementedError
 
-    def sample_configuration(self, size: Union[int, None]) \
+    def sample_configuration(self, size: Union[int, None] = None) \
             -> Union[HyperparameterConfiguration, list[HyperparameterConfiguration]]:
         """
         Returns a sample of configurations (set of hyperparameters).
@@ -85,17 +85,29 @@ class HyperparameterConfigurationSpace(Mapping[str, Hyperparameter]):
             configurations = configurations[0]
         return configurations
 
-    def get_default_configuration(self) -> HyperparameterConfiguration:
+    def get_default_configuration(self, size: Union[int, None] = None) -> HyperparameterConfiguration:
         """
         Returns the configuration that contains all default values for each hyperparameter.
 
         Returns:
             HyperparameterConfiguration: configuration contains all default values for each hyperparameter
         """
-        return HyperparameterConfiguration(
-            cs=self,
-            values={key: value.get_default() for key, value in self._values.items()}
-        )
+        assert size is None or size > 0, f"Illegal size {size}"
+
+        if size is None:
+            size = 1
+
+        default_configurations = []
+        for i in range(size):
+            default_configurations += [HyperparameterConfiguration(
+                cs=self,
+                values={key: value.get_default() for key, value in self._values.items()}
+            )]
+
+        if size == 1:
+            # Case: Return the single sample without the list element
+            default_configurations = default_configurations[0]
+        return default_configurations
 
     def __contains__(self, key: Any) -> bool:
         return key in self._values

@@ -12,9 +12,9 @@ class Categorical(Hyperparameter):
 
         Attributes:
             name (str): name of the hyperparameter
-            choices (Union[list[Any], None]): all possible discrete values of hyperparameter
+            choices (Union[list[Any], np.ndarray]): all possible discrete values of hyperparameter
             default (Any): default value of the hyperparameter
-            distribution (Union[Distribution], None]): distribution from where we sample new values for hyperparameter
+            distribution (Distribution): distribution from where we sample new values for hyperparameter
             weights (Union[tuple[int], tuple[float], None]): probability distribution for each possible discrete value
     """
 
@@ -24,9 +24,15 @@ class Categorical(Hyperparameter):
             choices: list[Any],
             default: Union[Any, None] = None,
             shape: Union[int, tuple[int, ...], None] = None,
-            distribution: Union[Distribution] = Choice(),
+            distribution: Distribution = Choice(),
             weights: Union[list[int], list[float], None] = None,
     ):
+        if isinstance(choices, list):
+            choices = np.array(choices)
+
+        if isinstance(weights, list):
+            weights = np.array(weights)
+
         # First set the variables
         self._choices = choices
         self._distribution = distribution
@@ -99,9 +105,9 @@ class Categorical(Hyperparameter):
 
     def _check_default(self, default: Union[Any, None]) -> Any:
         if default is None:
-            if self._weights:
+            if self._weights is not None:
                 # Case: Take the option with the highest probability as default value
-                return self._choices[self._weights.index(max(self._weights))]
+                return self._choices[np.argmax(self._weights)]
             else:
                 # Case: Take the first option as default value
                 return self._choices[0]
@@ -223,7 +229,10 @@ class Categorical(Hyperparameter):
         if isinstance(self._distribution, Choice):
             indices = random.choice(len(self._choices), size=size, replace=True, p=self._weights)
             if isinstance(indices, int):
-                indices = [indices]
+                if len(self._shape) > 1:
+                    return np.array(self._choices[indices])
+                else:
+                    return self._choices[indices]
             return np.array([self._choices[idx] for idx in indices])
         else:
             raise Exception(f"Unknown Probability Distribution {self._distribution}!")
