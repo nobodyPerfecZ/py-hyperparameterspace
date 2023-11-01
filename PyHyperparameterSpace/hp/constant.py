@@ -44,8 +44,10 @@ class Constant(Hyperparameter):
         if shape is None:
             # Case: Adjust the shape according to the given default value
             if isinstance(self._default, (int, float, bool, str)):
+                # Case: default is single dimensional
                 return (1,)
             elif isinstance(self._default, np.ndarray):
+                # Case: default is multidimensional
                 return self._default.shape
         elif self._is_legal_shape(shape):
             return shape
@@ -54,16 +56,19 @@ class Constant(Hyperparameter):
 
     def _is_legal_shape(self, shape: Union[int, tuple[int, ...]]) -> bool:
         if shape == 1 or shape == (1,):
-            # Check if shape has the right format for the default value
+            # Case: shape refers to single dimensional
             if isinstance(self._default, (int, float, bool, str)):
+                # Case: default is single dimensional
                 return True
         elif isinstance(shape, int):
-            # Check if shape has the right format for the default value
-            if isinstance(self._default, np.ndarray) and shape == len(self._default):
+            # Case: shape refers to array-like dimensional
+            if isinstance(self._default, np.ndarray) and shape == len(self._default) and self._default.ndim == 1:
+                # Case: default is array-like dimensional
                 return True
         elif isinstance(shape, tuple) and all(isinstance(s, int) for s in shape):
-            # Check if shape is in the right format for the default value
+            # Case: shape refers to multi-dimensional
             if isinstance(self._default, np.ndarray) and shape == self._default.shape:
+                # Case: default is multi-dimensional
                 return True
         return False
 

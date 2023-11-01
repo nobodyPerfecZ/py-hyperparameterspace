@@ -47,7 +47,7 @@ class Continuous(Hyperparameter, ABC):
         self._distribution = self._check_distribution(distribution)
 
     @property
-    def lb(self) -> Union[int, float, None]:
+    def lb(self) -> Union[int, float]:
         """
         Returns:
             Union[int, float]:
@@ -204,41 +204,40 @@ class Float(Continuous):
 
     def _check_default(self, default: Union[int, float, np.ndarray]) -> Union[int, float, np.ndarray]:
         if default is None:
+            # Case: default is not given
             if self._shape is None or self._shape == 1 or self._shape == (1,):
-                # Case: default value is not given and shape signalize single value
+                # Case: default should be single dimensional
                 return (self.lb + self.ub) / 2
             else:
-                # Case: make a default value matrix
+                # Case: default should be multidimensional
                 return np.full(shape=self._shape, fill_value=((self.lb + self.ub) / 2))
         elif self._is_legal_default(default):
-            # Case: default value is legal
             return default
         else:
-            # Case: default value is illegal
             raise Exception(f"Illegal default value {default}!")
 
     def _is_legal_default(self, default: Any) -> bool:
         if not isinstance(default, (float, int)) and \
                 not (isinstance(default, np.ndarray) and np.issubdtype(default.dtype, np.floating)) and \
                 not (isinstance(default, np.ndarray) and np.issubdtype(default.dtype, np.integer)):
-            # Case: Default is not in the right format!
+            # Case: default is not in the right format
             return False
         if isinstance(default, (float, int)):
-            # Case: Default is a float/int value
+            # Case: default is single dimensional
             return self.lb <= default < self.ub
         elif isinstance(default, np.ndarray):
-            # Case: Default is a float/int matrix
+            # Case: default is multidimensional
             return np.all((default >= self.lb) & (default < self.ub))
-        else:
-            # Case: Default is a float/int tensor
-            return torch.all((default >= self.lb) & (default < self.ub))
+        return False
 
     def _check_shape(self, shape: Union[int, tuple[int, ...]]) -> Union[int, tuple[int, ...]]:
         if shape is None:
             # Case: Adjust the shape according to the given default value
             if self._default is None or isinstance(self._default, (float, int)):
+                # Case: default is not given or single dimensional
                 return (1,)
             elif isinstance(self._default, np.ndarray):
+                # Case: default is multidimensional
                 return self._default.shape
         elif self._is_legal_shape(shape):
             return shape
@@ -247,16 +246,19 @@ class Float(Continuous):
 
     def _is_legal_shape(self, shape: Union[int, tuple[int, ...]]) -> bool:
         if shape == 1 or shape == (1,):
-            # Check if shape has the right format for the default value
+            # Case: shape refers to single dimensional
             if isinstance(self._default, (float, int)):
+                # Case: default is single dimensional
                 return True
         elif isinstance(shape, int):
-            # Check if shape has the right format for the default value
-            if isinstance(self._default, np.ndarray) and shape == len(self._default):
+            # Case: shape refers to array-like dimensional
+            if isinstance(self._default, np.ndarray) and shape == len(self._default) and self._default.ndim == 1:
+                # Case: default is array-like dimensional
                 return True
         elif isinstance(shape, tuple) and all(isinstance(s, int) for s in shape):
-            # Check if shape is in the right format for the default value
+            # Case: shape refers to multidimensional
             if isinstance(self._default, np.ndarray) and shape == self._default.shape:
+                # Case: default is multidimensional
                 return True
         return False
 
@@ -327,11 +329,11 @@ class Float(Continuous):
 
     def valid_configuration(self, value: Any) -> bool:
         if isinstance(value, (list, np.ndarray)):
-            # Case: Value is multi-dimensional
+            # Case: Value is multidimensional
             value = np.array(value)
             return np.all((self.lb <= value) & (value < self.ub)) and self._shape == value.shape
         elif isinstance(value, (int, float)):
-            # Case: value is single-dimensional
+            # Case: value is single dimensional
             return self.lb <= value < self.ub
         return False
 
@@ -394,11 +396,12 @@ class Integer(Continuous):
 
     def _check_default(self, default: Union[int, np.ndarray]) -> Union[int, np.ndarray]:
         if default is None:
+            # Case: default is not given
             if self._shape is None or self._shape == 1 or self._shape == (1,):
-                # Case: shape signalize single value
+                # Case: shape refers to single dimensional
                 return int((self.lb + self.ub) / 2)
             else:
-                # Case: make a default value matrix
+                # Case: Shape refers to multidimensional
                 return np.full(shape=self._shape, fill_value=int((self.lb + self.ub) / 2))
         elif self._is_legal_default(default):
             # Case: default value is legal
@@ -410,21 +413,23 @@ class Integer(Continuous):
     def _is_legal_default(self, default: Union[int, np.ndarray]) -> bool:
         if not isinstance(default, int) and \
                 not (isinstance(default, np.ndarray) and np.issubdtype(default.dtype, np.integer)):
-            # Case: Default is not in the right format!
+            # Case: default is not in the right format!
             return False
         if isinstance(default, int):
-            # Case: Default is a float/int value
+            # Case: default is single dimensional
             return self.lb <= default <= self.ub
         else:
-            # Case: Default is a float/int matrix
+            # Case: default is multidimensional
             return np.all((default >= self.lb) & (default <= self.ub))
 
     def _check_shape(self, shape: Union[int, tuple[int, ...]]) -> Union[int, tuple[int, ...]]:
         if shape is None:
             # Case: Adjust the shape according to the given default value
             if self._default is None or isinstance(self._default, int):
+                # Case: default is not given or single dimensional
                 return (1,)
             elif isinstance(self._default, np.ndarray):
+                # Case: default is multidimensional
                 return self._default.shape
         elif self._is_legal_shape(shape):
             return shape
@@ -435,14 +440,17 @@ class Integer(Continuous):
         if shape == 1 or shape == (1,):
             # Check if shape has the right format for the default value
             if isinstance(self._default, int):
+                # Case: default is single dimensional
                 return True
         elif isinstance(shape, int):
             # Check if shape has the right format for the default value
-            if isinstance(self._default, np.ndarray) and shape == len(self._default):
+            if isinstance(self._default, np.ndarray) and shape == len(self._default) and self._default.ndim == 1:
+                # Case: default is array-like dimensional
                 return True
         elif isinstance(shape, tuple) and all(isinstance(s, int) for s in shape):
             # Check if shape is in the right format for the default value
             if isinstance(self._default, np.ndarray) and shape == self._default.shape:
+                # Case: default is multidimensional
                 return True
         return False
 

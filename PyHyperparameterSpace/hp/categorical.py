@@ -114,7 +114,7 @@ class Categorical(Hyperparameter):
         elif self._is_legal_default(default):
             return default
         else:
-            raise Exception(f"Illegal default value {default}!")
+            raise Exception(f"Illegal default {default}!")
 
     def _is_legal_default(self, default: Union[Any, None]) -> bool:
         if isinstance(default, (list, np.ndarray)):
@@ -126,23 +126,30 @@ class Categorical(Hyperparameter):
         if shape is None:
             # Case: Adjust the shape according to the given default value
             if self._default is None or isinstance(self._default, (int, float, bool, str)):
+                # Case: default value is not given or is single dimensional
                 return (1,)
             elif isinstance(self._default, np.ndarray):
+                # Case: default value is multidimensional
                 return self._default.shape
         elif self._is_legal_shape(shape):
             return shape
         else:
-            raise Exception(f"Illegal shape {shape}")
+            raise Exception(f"Illegal shape {shape}!")
 
-    def _is_legal_shape(self, shape: Union[int, tuple[int, ...], None]) -> bool:
+    def _is_legal_shape(self, shape: Union[int, tuple[int, ...]]) -> bool:
         if shape == 1 or shape == (1,):
+            # Case: shape refers to single dimensional
             if isinstance(self._default, (int, float, bool, str)):
                 return True
         elif isinstance(shape, int):
-            if isinstance(self._default, np.ndarray) and shape == len(self._default):
+            # Case: shape refers to array-like dimensional
+            if isinstance(self._default, np.ndarray) and shape == len(self._default) and self._default.ndim == 1:
+                # Case: default is array-like dimensional
                 return True
         elif isinstance(shape, tuple) and all(isinstance(s, int) for s in shape):
+            # Case: shape refers to multidimensional
             if isinstance(self._default, np.ndarray) and shape == self._default.shape:
+                # Case: default value is multidimensional
                 return True
         return False
 
@@ -162,7 +169,7 @@ class Categorical(Hyperparameter):
         if self._is_legal_distribution(distribution):
             return distribution
         else:
-            raise Exception(f"Illegal distribution {distribution}")
+            raise Exception(f"Illegal distribution {distribution}!")
 
     def _is_legal_distribution(self, distribution: Distribution) -> bool:
         """
@@ -178,10 +185,9 @@ class Categorical(Hyperparameter):
         """
         if isinstance(distribution, Choice):
             return True
-        else:
-            return False
+        return False
 
-    def _check_weights(self, weights: Union[list[int], list[float], None]) -> Union[list[int], list[float]]:
+    def _check_weights(self, weights: Union[list[int], list[float], np.ndarray, None]) -> np.ndarray:
         """
         Checks if the given weights are legal. Weights are called legal, if (...)
             - fulfills the right format [w1, w2, ...]
@@ -195,17 +201,17 @@ class Categorical(Hyperparameter):
                 Weights to check
 
         Returns:
-            Union[list[int], list[float], None]:
+            np.ndarray:
                 Normalized weights
         """
         if weights is None:
-            return Categorical._normalize([1 for _ in range(len(self._choices))])
+            return Categorical._normalize(np.array([1 for _ in range(len(self._choices))]))
         elif self._is_legal_weights(weights):
-            return Categorical._normalize(weights)
+            return Categorical._normalize(np.array(weights))
         else:
-            raise Exception(f"Illegal weights {weights}")
+            raise Exception(f"Illegal weights {weights}!")
 
-    def _is_legal_weights(self, weights: Union[list[int], list[float], None]) -> bool:
+    def _is_legal_weights(self, weights: Union[list[int], list[float], np.ndarray]) -> bool:
         """
         Returns True if the given weights (...)
             - fulfills the right format [w1, w2, ...]
@@ -213,25 +219,29 @@ class Categorical(Hyperparameter):
             - for all w_i >= 0
 
         Args:
-            weights (Union[list[int], list[float], None]):
+            weights (Union[list[int], list[float], np.ndarray]):
                 Weights to check
 
         Returns:
             bool:
                 True if weights are legal
         """
-        if isinstance(weights, (list, np.ndarray)) and len(weights) == len(self._choices) and all(
-                0 <= w for w in weights):
+        if isinstance(weights, (list, np.ndarray)) and len(weights) == len(self._choices) and \
+                all(0 <= w for w in weights):
             return True
         return False
 
     def sample(self, random: np.random.RandomState, size: Union[int, None] = None) -> Any:
         if isinstance(self._distribution, Choice):
+            # Case: Sample from given distribution (with weights)
             indices = random.choice(len(self._choices), size=size, replace=True, p=self._weights)
             if isinstance(indices, int):
+                # Case: Only a single sample should be returned
                 if len(self._shape) > 1:
+                    # Case: values is multidimensional
                     return np.array(self._choices[indices])
                 else:
+                    # Case: values are single dimensional
                     return self._choices[indices]
             return np.array([self._choices[idx] for idx in indices])
         else:
@@ -239,10 +249,10 @@ class Categorical(Hyperparameter):
 
     def valid_configuration(self, value: Any) -> bool:
         if isinstance(value, (list, np.ndarray)):
-            # Case: Value is multi-dimensional
+            # Case: value is multidimensional
             return any(np.array_equal(value, choice) for choice in self._choices)
         else:
-            # Case: value is single-dimensional
+            # Case: value is single dimensional
             return value in self._choices
 
     def __eq__(self, other: Any) -> bool:
