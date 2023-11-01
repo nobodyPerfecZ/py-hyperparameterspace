@@ -186,17 +186,21 @@ class Hyperparameter(ABC):
     def _get_sample_size(
             cls,
             size: Union[int, None] = None,
-            shape: Union[int, tuple[int, ...], None] = None,
+            shape: Union[int, tuple[int, ...]] = None,
     ) -> Union[int, tuple[int], None]:
         """
         Returns the resulting shape of the sample, according to size and shape.
 
         Args:
-            size (Union[int, None]): number of samples
-            shape (Union[int, Iterable, tuple[int], None]): shape of one hyperparameter
+            size (Union[int, None]):
+                Number of samples
+
+            shape (Union[int, Iterable, tuple[int], None]):
+                Shape of one hyperparameter
 
         Returns:
-            Union[int, tuple[int, ...]]: shape of the samples
+            Union[int, tuple[int, ...]]:
+                Shape of the samples
         """
         assert size is None or size > 0, "#ERROR_HYPERPARAMETER: size should be None or higher than 0!"
         if isinstance(shape, int):
@@ -208,6 +212,7 @@ class Hyperparameter(ABC):
             # Case: Shape of the hyperparameter is just a single value
             return size
         elif size is None or size == 1:
+            # Case: Only one sample should be sampled
             return shape
         elif isinstance(shape, int):
             # Case: shape is a single value
@@ -217,19 +222,29 @@ class Hyperparameter(ABC):
             return size, *shape
 
     @classmethod
-    def _normalize(cls, p: list[float]) -> list[float]:
+    def _normalize(cls, p: Union[list[float], np.ndarray]) -> Union[list[float], np.ndarray]:
         """
-        Normalizes the given probability dist, so that sum(p)=1.
+        Normalizes the given probability distribution, so that sum(p)=1.
 
         Args:
-            p (list[float]): (non-)normalized probability dist
+            p (Union[list[float], np.ndarray]):
+                Non-normalized probability distribution
+
+        Returns:
+            Union[list[float], np.ndarray]:
+                Normalized probability distribution
         """
         assert all(0.0 <= prob for prob in p), \
             "The given non-normalized dist p cannot contain negative values!"
 
+        if isinstance(p, list):
+            result_type = list
+        else:
+            result_type = np.array
+
         sum_p = np.sum(p)
         if sum_p == 1:
             # Case: p is already normalized
-            return p
+            return result_type(p)
         # Case: p should be normalized
-        return [prob / sum_p for prob in p]
+        return result_type([prob / sum_p for prob in p])
