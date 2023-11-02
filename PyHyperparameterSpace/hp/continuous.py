@@ -2,7 +2,7 @@ from typing import Union, Iterable, Any
 from abc import ABC, abstractmethod
 import numpy as np
 
-from PyHyperparameterSpace.dist.continuous import MultivariateNormal, Normal, Uniform
+from PyHyperparameterSpace.dist.continuous import MatrixNormal, MultivariateNormal, Normal, Uniform
 from PyHyperparameterSpace.hp.abstract_hp import Hyperparameter
 from PyHyperparameterSpace.dist.abstract_dist import Distribution
 
@@ -269,13 +269,16 @@ class Float(Continuous):
             raise Exception(f"Illegal distribution {distribution}!")
 
     def _is_legal_distribution(self, distribution: Union[Distribution, None]) -> bool:
+        if isinstance(distribution, MatrixNormal):
+            # Case: Matrix normal distribution
+            # Check if mean in between the bounds and shape should have a format of (n,p)
+            return np.all((self.lb <= distribution.M) & (distribution.M < self.ub)) and \
+                   self._shape == distribution.M.shape
         if isinstance(distribution, MultivariateNormal):
             # Case: Multivariate normal distribution
-            # Check if mean is in between the bounds and shape should have a format of (N,)
-            return all(self.lb <= m <= self.ub for m in distribution.mean) and \
-                   self._shape == (len(distribution.mean),) and \
-                   len(distribution.mean) > 1 and \
-                   len(distribution.cov) > 1
+            # Check if mean is in between the bounds and shape should have a format of (n,)
+            return np.all((self.lb <= distribution.mean) & (distribution.mean < self.ub)) and \
+                   self._shape == distribution.mean.shape
         elif isinstance(distribution, Normal):
             # Case: Normal distribution
             # Check if mean (loc) is in between the bounds
@@ -286,21 +289,31 @@ class Float(Continuous):
         return False
 
     def sample(self, random: np.random.RandomState, size: Union[int, None] = None) -> Any:
-        if isinstance(self._distribution, MultivariateNormal):
+        if isinstance(self._distribution, MatrixNormal):
+            # Case: Sample from matrix normal distribution by sampling from multivariate normal distribution
+            sample = random.multivariate_normal(
+                mean=np.ravel(self._distribution.M),
+                cov=np.kron(self._distribution.U, self._distribution.V),
+                size=size
+            )
+
+            # Do not exceed lower, upper bound
+            sample[sample < self.lb] = self.lb
+            sample[sample >= self.ub] = self.ub - 1e-10
+            # Reshape the samples into matrices
+            if size is None:
+                sample = sample.reshape(self._distribution.M.shape[0], self._distribution.M.shape[1])
+            else:
+                sample = sample.reshape(size, self._distribution.M.shape[0], self._distribution.M.shape[1])
+            return sample
+        elif isinstance(self._distribution, MultivariateNormal):
             # Case: Sample from multivariate normal distribution
             sample = random.multivariate_normal(mean=self._distribution.mean, cov=self._distribution.cov, size=size)
 
             # Do not exceed lower, upper bound
-            if isinstance(sample, float):
-                # Case: Sample is a single value
-                if sample < self.lb:
-                    sample = self.lb
-                elif sample >= self.ub:
-                    sample = self.ub - 1e-10
-            else:
-                # Case: Sample is a numpy array
-                sample[sample < self.lb] = self.lb
-                sample[sample >= self.ub] = self.ub - 1e-10
+            sample[sample < self.lb] = self.lb
+            sample[sample >= self.ub] = self.ub - 1e-10
+
             return sample
         elif isinstance(self._distribution, Normal):
             # Case: Sample from normal distribution

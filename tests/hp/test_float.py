@@ -3,7 +3,7 @@ import numpy as np
 import yaml
 
 from PyHyperparameterSpace.hp.continuous import Float
-from PyHyperparameterSpace.dist.continuous import MultivariateNormal, Normal, Uniform
+from PyHyperparameterSpace.dist.continuous import MatrixNormal, MultivariateNormal, Normal, Uniform
 
 
 class TestFloat(unittest.TestCase):
@@ -24,6 +24,7 @@ class TestFloat(unittest.TestCase):
         self.random = np.random.RandomState()
         self.size = 10
         self.multivariate_normal_distribution = MultivariateNormal(mean=[0, 0], cov=[[1, 0], [0, 100]])
+        self.matrix_normal_distribution = MatrixNormal(M=[[0, 0], [0, 0]], U=[[1, 0], [0, 1]], V=[[1, 0], [0, 1]])
         self.normal_distribution = Normal(loc=0.0, scale=10.0)
         self.uniform_distribution = Uniform()
 
@@ -56,6 +57,10 @@ class TestFloat(unittest.TestCase):
         self.multivariate_normal_hp = Float(name=self.name, shape=None, bounds=self.bounds, default=self.default4,
                                             distribution=self.multivariate_normal_distribution)
 
+        # Tests with matrix normal distribution
+        self.matrix_normal_hp = Float(name=self.name, shape=None, bounds=self.bounds, default=self.default3,
+                                      distribution=self.matrix_normal_distribution)
+
     def test_name(self):
         """
         Tests the property name.
@@ -69,6 +74,7 @@ class TestFloat(unittest.TestCase):
         self.assertEqual(self.name, self.uniform_hp3._name)
         self.assertEqual(self.name, self.uniform_hp4._name)
         self.assertEqual(self.name, self.multivariate_normal_hp._name)
+        self.assertEqual(self.name, self.matrix_normal_hp._name)
 
     def test_shape(self):
         """
@@ -83,6 +89,7 @@ class TestFloat(unittest.TestCase):
         self.assertEqual(self.shape2, self.uniform_hp3._shape)
         self.assertEqual(self.shape2, self.uniform_hp4._shape)
         self.assertEquals(self.shape3, self.multivariate_normal_hp._shape)
+        self.assertEqual(self.shape2, self.matrix_normal_hp._shape)
 
     def test_bounds(self):
         """
@@ -97,6 +104,7 @@ class TestFloat(unittest.TestCase):
         self.assertEqual(self.bounds, self.uniform_hp3._bounds)
         self.assertEqual(self.bounds, self.uniform_hp4._bounds)
         self.assertEqual(self.bounds, self.multivariate_normal_hp._bounds)
+        self.assertEqual(self.bounds, self.matrix_normal_hp._bounds)
 
     def test_default(self):
         """
@@ -111,6 +119,7 @@ class TestFloat(unittest.TestCase):
         self.assertTrue(np.all(self.default3 == self.uniform_hp3._default))
         self.assertTrue(np.all(self.default2 == self.uniform_hp4._default))
         self.assertTrue(np.all(self.default4 == self.multivariate_normal_hp._default))
+        self.assertTrue(np.all(self.default3 == self.matrix_normal_hp._default))
 
     def test_distribution(self):
         """
@@ -125,6 +134,7 @@ class TestFloat(unittest.TestCase):
         self.assertIsInstance(self.uniform_hp3._distribution, Uniform)
         self.assertIsInstance(self.uniform_hp4._distribution, Uniform)
         self.assertIsInstance(self.multivariate_normal_hp._distribution, MultivariateNormal)
+        self.assertIsInstance(self.matrix_normal_hp._distribution, MatrixNormal)
 
     def test_lb(self):
         """
@@ -139,6 +149,7 @@ class TestFloat(unittest.TestCase):
         self.assertEqual(self.bounds[0], self.uniform_hp3.lb)
         self.assertEqual(self.bounds[0], self.uniform_hp4.lb)
         self.assertEqual(self.bounds[0], self.multivariate_normal_hp.lb)
+        self.assertEqual(self.bounds[0], self.matrix_normal_hp.lb)
 
     def test_ub(self):
         """
@@ -153,6 +164,7 @@ class TestFloat(unittest.TestCase):
         self.assertEqual(self.bounds[1], self.uniform_hp3.ub)
         self.assertEqual(self.bounds[1], self.uniform_hp4.ub)
         self.assertEqual(self.bounds[1], self.multivariate_normal_hp.ub)
+        self.assertEqual(self.bounds[1], self.matrix_normal_hp.ub)
 
     def test_get_name(self):
         """
@@ -166,6 +178,8 @@ class TestFloat(unittest.TestCase):
         self.assertEqual(self.name, self.uniform_hp2.get_name())
         self.assertEqual(self.name, self.uniform_hp3.get_name())
         self.assertEqual(self.name, self.uniform_hp4.get_name())
+        self.assertEqual(self.name, self.multivariate_normal_hp.get_name())
+        self.assertEqual(self.name, self.matrix_normal_hp.get_name())
 
     def test_get_default(self):
         """
@@ -180,6 +194,7 @@ class TestFloat(unittest.TestCase):
         self.assertTrue(np.all(self.default3 == self.uniform_hp3.get_default()))
         self.assertTrue(np.all(self.default2 == self.uniform_hp4.get_default()))
         self.assertTrue(np.all(self.default4 == self.multivariate_normal_hp.get_default()))
+        self.assertTrue(np.all(self.default3 == self.matrix_normal_hp.get_default()))
 
     def test_get_shape(self):
         """
@@ -194,6 +209,7 @@ class TestFloat(unittest.TestCase):
         self.assertEqual(self.shape2, self.uniform_hp3.get_shape())
         self.assertEqual(self.shape2, self.uniform_hp4.get_shape())
         self.assertEqual(self.shape3, self.multivariate_normal_hp.get_shape())
+        self.assertEqual(self.shape2, self.matrix_normal_hp.get_shape())
 
     def test_get_bounds(self):
         """
@@ -208,6 +224,7 @@ class TestFloat(unittest.TestCase):
         self.assertEqual(self.bounds, self.uniform_hp3.get_bounds())
         self.assertEqual(self.bounds, self.uniform_hp4.get_bounds())
         self.assertEqual(self.bounds, self.multivariate_normal_hp.get_bounds())
+        self.assertEqual(self.bounds, self.matrix_normal_hp.get_bounds())
 
     def test_get_distribution(self):
         """
@@ -222,6 +239,7 @@ class TestFloat(unittest.TestCase):
         self.assertIsInstance(self.uniform_hp3.get_distribution(), Uniform)
         self.assertIsInstance(self.uniform_hp4.get_distribution(), Uniform)
         self.assertIsInstance(self.multivariate_normal_hp.get_distribution(), MultivariateNormal)
+        self.assertIsInstance(self.matrix_normal_hp.get_distribution(), MatrixNormal)
 
     def test_sample(self):
         """
@@ -250,8 +268,12 @@ class TestFloat(unittest.TestCase):
         self.assertEqual(self.shape3, multivariate_normal_sample[0].shape)
         self.assertTrue(
             np.all((self.bounds[0] <= multivariate_normal_sample) & (multivariate_normal_sample < self.bounds[1])))
+
+        matrix_normal_sample = self.matrix_normal_hp.sample(random=self.random, size=self.size)
+        self.assertEqual(self.size, len(matrix_normal_sample))
+        self.assertEqual(self.shape2,  matrix_normal_sample[0].shape)
         self.assertTrue(
-            np.all((self.bounds[0] <= multivariate_normal_sample) & (multivariate_normal_sample < self.bounds[1])))
+            np.all((self.bounds[0] <= matrix_normal_sample) & (matrix_normal_sample < self.bounds[1])))
 
     def test_valid_configuration(self):
         """
