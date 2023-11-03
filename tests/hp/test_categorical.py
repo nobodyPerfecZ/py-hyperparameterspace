@@ -24,6 +24,7 @@ class TestCategorical(unittest.TestCase):
         self.default5 = np.array([["X2", "X3"], ["X4", "X1"]])
         self.distribution = Choice()
         self.weights = [0.1, 0.1, 0.2, 0.1, 0.5]
+        self.new_weights = [0.2, 0.2, 0.2, 0.2, 0.2]
         self.weights_uniform = [0.2, 0.2, 0.2, 0.2, 0.2]
         self.weights5 = [0.3, 0.4, 0.3]
         self.random = np.random.RandomState()
@@ -161,6 +162,13 @@ class TestCategorical(unittest.TestCase):
         self.assertTrue(np.array_equal(self.weights_uniform, self.hp3.get_weights()))
         self.assertTrue(np.array_equal(self.weights_uniform, self.hp4.get_weights()))
         self.assertTrue(np.array_equal(self.weights5, self.hp5.get_weights()))
+
+    def test_change_distribution(self):
+        """
+        Tests the method _change_distribution().
+        """
+        self.hp.change_distribution(weights=self.new_weights)
+        self.assertTrue(np.array_equal(self.new_weights, self.hp.get_weights()))
 
     def test_sample(self):
         """

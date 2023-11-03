@@ -25,7 +25,7 @@ class TestFloat(unittest.TestCase):
         self.size = 10
         self.multivariate_normal_distribution = MultivariateNormal(mean=[0, 0], cov=[[1, 0], [0, 100]])
         self.matrix_normal_distribution = MatrixNormal(M=[[0, 0], [0, 0]], U=[[1, 0], [0, 1]], V=[[1, 0], [0, 1]])
-        self.normal_distribution = Normal(loc=0.0, scale=10.0)
+        self.normal_distribution = Normal(mean=0.0, std=10.0)
         self.uniform_distribution = Uniform()
 
         # Tests with all options given
@@ -241,11 +241,22 @@ class TestFloat(unittest.TestCase):
         self.assertIsInstance(self.multivariate_normal_hp.get_distribution(), MultivariateNormal)
         self.assertIsInstance(self.matrix_normal_hp.get_distribution(), MatrixNormal)
 
+    def test_change_distribution(self):
+        """
+        Tests the method change_distribution().
+        """
+        new_mean = 0.5
+        new_std = 1.5
+        self.normal_hp.change_distribution(mean=new_mean, std=new_std)
+
+        distribution = self.normal_hp.get_distribution()
+        self.assertEqual(new_mean, distribution.mean)
+        self.assertEqual(new_std, distribution.std)
+
     def test_sample(self):
         """
         Tests the method sample().
         """
-
         normal_sample = self.normal_hp.sample(random=self.random, size=self.size)
         uniform_sample = self.uniform_hp.sample(random=self.random, size=self.size)
         self.assertEqual(self.size, len(normal_sample))

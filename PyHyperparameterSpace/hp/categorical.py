@@ -11,11 +11,20 @@ class Categorical(Hyperparameter):
     Class to represent a categorical hyperparameter.
 
         Attributes:
-            name (str): name of the hyperparameter
-            choices (Union[list[Any], np.ndarray]): all possible discrete values of hyperparameter
-            default (Any): default value of the hyperparameter
-            distribution (Distribution): distribution from where we sample new values for hyperparameter
-            weights (Union[tuple[int], tuple[float], None]): probability distribution for each possible discrete value
+            name (str):
+                Name of the hyperparameter
+
+            choices (Union[list[Any], np.ndarray]):
+                All possible discrete values of hyperparameter
+
+            default (Any):
+                Default value of the hyperparameter
+
+            distribution (Distribution):
+                Distribution from where we sample new values for hyperparameter
+
+            weights (Union[list[int], list[float], None]):
+                Probability distribution for each possible discrete value
     """
 
     def __init__(
@@ -230,6 +239,16 @@ class Categorical(Hyperparameter):
                 all(0 <= w for w in weights):
             return True
         return False
+
+    def change_distribution(self, **kwargs):
+        """
+        Changes the distribution to the given parameters.
+
+        Args:
+            **kwargs (dict):
+                Parameters that defines the distribution
+        """
+        self._weights = self._check_weights(weights=kwargs["weights"])
 
     def sample(self, random: np.random.RandomState, size: Union[int, None] = None) -> Any:
         if isinstance(self._distribution, Choice):

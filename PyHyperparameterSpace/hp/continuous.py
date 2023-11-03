@@ -282,11 +282,22 @@ class Float(Continuous):
         elif isinstance(distribution, Normal):
             # Case: Normal distribution
             # Check if mean (loc) is in between the bounds
-            return self.lb <= distribution.loc < self.ub
+            return self.lb <= distribution.mean < self.ub
         elif isinstance(distribution, Uniform):
             # Case: Uniform distribution
             return True
         return False
+
+    def change_distribution(self, **kwargs):
+        """
+        Changes the distribution to the given parameters.
+
+        Args:
+            **kwargs (dict):
+                Parameters that defines the distribution
+        """
+        self._distribution.change_distribution(**kwargs)
+        self._check_distribution(self._distribution)
 
     def sample(self, random: np.random.RandomState, size: Union[int, None] = None) -> Any:
         if isinstance(self._distribution, MatrixNormal):
@@ -318,7 +329,7 @@ class Float(Continuous):
         elif isinstance(self._distribution, Normal):
             # Case: Sample from normal distribution
             sample_size = Float._get_sample_size(size=size, shape=self._shape)
-            sample = random.normal(loc=self._distribution.loc, scale=self._distribution.scale, size=sample_size)
+            sample = random.normal(loc=self._distribution.mean, scale=self._distribution.std, size=sample_size)
 
             # Do not exceed lower, upper bound
             if isinstance(sample, float):
