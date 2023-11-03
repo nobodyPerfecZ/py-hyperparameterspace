@@ -97,6 +97,7 @@ cs = HyperparameterConfigurationSpace(
 The following list defines features, that are currently on work:
 
 * [ ] Add Constraints to HyperparameterConfigurationSpace to also add Hierarchical Hyperparameters
+* [x] Implement change_distribution() to change the distribution for Categorical and Float Hyperparameters
 * [x] Implement Matrix normal distribution as sampling option for Float Hyperparameters
 * [x] Implement saving functions of HyperparameterConfiguration in JSON and YML format
 * [x] Remove Binary() class, because it is very similar to categorical
