@@ -22,26 +22,30 @@ class TestCategorical(unittest.TestCase):
         self.default_X3 = "X3"
         self.default_X5 = "X5"
         self.default5 = np.array([["X2", "X3"], ["X4", "X1"]])
-        self.distribution = Choice()
+
         self.weights = [0.1, 0.1, 0.2, 0.1, 0.5]
         self.new_weights = [0.2, 0.2, 0.2, 0.2, 0.2]
         self.weights_uniform = [0.2, 0.2, 0.2, 0.2, 0.2]
         self.weights5 = [0.3, 0.4, 0.3]
+
+        self.distribution = Choice(self.weights)
+        self.distribution2 = Choice(self.weights5)
         self.random = np.random.RandomState()
         self.size = 10
 
         # Tests with all options given
-        self.hp = Categorical(name=self.name, choices=self.choices, default=self.default_X3, distribution=self.distribution, weights=self.weights)
+        self.hp = Categorical(name=self.name, choices=self.choices, default=self.default_X3,
+                              distribution=self.distribution)
         # Tests with default=None
         self.hp2 = Categorical(name=self.name, choices=self.choices, default=None,
-                               distribution=self.distribution, weights=self.weights)
-        # Tests with weights=None
-        self.hp3 = Categorical(name=self.name, choices=self.choices, default=self.default_X3, weights=None)
-        # Tests with default=None, weights=None
-        self.hp4 = Categorical(name=self.name, choices=self.choices, default=None, weights=None)
+                               distribution=self.distribution)
+        # Tests with distribution=None
+        self.hp3 = Categorical(name=self.name, choices=self.choices, default=self.default_X1, distribution=None)
+        # Tests with default=None and distribution=None
+        self.hp4 = Categorical(name=self.name, choices=self.choices, default=None, distribution=None)
         # Test with all options
-        self.hp5 = Categorical(name=self.name, choices=self.choices5, default=self.default5, weights=self.weights5,
-                               shape=self.shape5)
+        self.hp5 = Categorical(name=self.name, choices=self.choices5, default=self.default5,
+                               distribution=self.distribution2, shape=self.shape5)
 
     def test_name(self):
         """
@@ -79,7 +83,7 @@ class TestCategorical(unittest.TestCase):
         """
         self.assertEqual(self.default_X3, self.hp._default)
         self.assertEqual(self.default_X5, self.hp2._default)
-        self.assertEqual(self.default_X3, self.hp3._default)
+        self.assertEqual(self.default_X1, self.hp3._default)
         self.assertEqual(self.default_X1, self.hp4._default)
         self.assertTrue(np.all(self.default5 == self.hp5._default))
 
@@ -92,16 +96,6 @@ class TestCategorical(unittest.TestCase):
         self.assertIsInstance(self.hp3._distribution, Choice)
         self.assertIsInstance(self.hp4._distribution, Choice)
         self.assertIsInstance(self.hp5._distribution, Choice)
-
-    def test_weights(self):
-        """
-        Tests the property weights.
-        """
-        self.assertTrue(np.array_equal(self.weights, self.hp._weights))
-        self.assertTrue(np.array_equal(self.weights, self.hp2._weights))
-        self.assertTrue(np.array_equal(self.weights_uniform, self.hp3._weights))
-        self.assertTrue(np.array_equal(self.weights_uniform, self.hp4._weights))
-        self.assertTrue(np.array_equal(self.weights5, self.hp5._weights))
 
     def test_get_name(self):
         """
@@ -119,7 +113,7 @@ class TestCategorical(unittest.TestCase):
         """
         self.assertEqual(self.default_X3, self.hp.get_default())
         self.assertEqual(self.default_X5, self.hp2.get_default())
-        self.assertEqual(self.default_X3, self.hp3.get_default())
+        self.assertEqual(self.default_X1, self.hp3.get_default())
         self.assertEqual(self.default_X1, self.hp4.get_default())
         self.assertTrue(np.all(self.default5 == self.hp5.get_default()))
 
@@ -147,28 +141,18 @@ class TestCategorical(unittest.TestCase):
         """
         Tests the method get_distribution().
         """
-        self.assertIsInstance(self.hp._distribution, Choice)
-        self.assertIsInstance(self.hp2._distribution, Choice)
-        self.assertIsInstance(self.hp3._distribution, Choice)
-        self.assertIsInstance(self.hp4._distribution, Choice)
-        self.assertIsInstance(self.hp5._distribution, Choice)
-
-    def test_get_weights(self):
-        """
-        Tests the method get_weights().
-        """
-        self.assertTrue(np.array_equal(self.weights, self.hp.get_weights()))
-        self.assertTrue(np.array_equal(self.weights, self.hp2.get_weights()))
-        self.assertTrue(np.array_equal(self.weights_uniform, self.hp3.get_weights()))
-        self.assertTrue(np.array_equal(self.weights_uniform, self.hp4.get_weights()))
-        self.assertTrue(np.array_equal(self.weights5, self.hp5.get_weights()))
+        self.assertIsInstance(self.hp.get_distribution(), Choice)
+        self.assertIsInstance(self.hp2.get_distribution(), Choice)
+        self.assertIsInstance(self.hp3.get_distribution(), Choice)
+        self.assertIsInstance(self.hp4.get_distribution(), Choice)
+        self.assertIsInstance(self.hp5.get_distribution(), Choice)
 
     def test_change_distribution(self):
         """
         Tests the method _change_distribution().
         """
         self.hp.change_distribution(weights=self.new_weights)
-        self.assertTrue(np.array_equal(self.new_weights, self.hp.get_weights()))
+        self.assertTrue(np.array_equal(self.new_weights, self.hp._distribution.weights))
 
     def test_sample(self):
         """

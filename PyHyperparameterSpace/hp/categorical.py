@@ -20,11 +20,8 @@ class Categorical(Hyperparameter):
             default (Any):
                 Default value of the hyperparameter
 
-            distribution (Distribution):
+            distribution (Union[Distribution, None]):
                 Distribution from where we sample new values for hyperparameter
-
-            weights (Union[list[int], list[float], None]):
-                Probability distribution for each possible discrete value
     """
 
     def __init__(
@@ -33,26 +30,20 @@ class Categorical(Hyperparameter):
             choices: list[Any],
             default: Union[Any, None] = None,
             shape: Union[int, tuple[int, ...], None] = None,
-            distribution: Distribution = Choice(),
-            weights: Union[list[int], list[float], None] = None,
+            distribution: Union[Distribution, None] = None,
     ):
         if isinstance(choices, list):
             choices = np.array(choices)
 
-        if isinstance(weights, list):
-            weights = np.array(weights)
-
         # First set the variables
         self._choices = choices
         self._distribution = distribution
-        self._weights = weights
 
         super().__init__(name=name, shape=shape, default=default)
 
         # Then check the variables and set them again
         self._choices = self._check_choices(choices)
         self._distribution = self._check_distribution(distribution)
-        self._weights = self._check_weights(weights)
 
     def get_choices(self) -> list[str]:
         """
@@ -69,14 +60,6 @@ class Categorical(Hyperparameter):
                 Distribution from where we sample
         """
         return self._distribution
-
-    def get_weights(self) -> list[float]:
-        """
-        Returns:
-            list[float]:
-                List of weights for each choice
-        """
-        return self._weights
 
     def _check_choices(self, choices: list[Any]) -> list[Any]:
         """
@@ -114,9 +97,9 @@ class Categorical(Hyperparameter):
 
     def _check_default(self, default: Union[Any, None]) -> Any:
         if default is None:
-            if self._weights is not None:
+            if self._distribution is not None:
                 # Case: Take the option with the highest probability as default value
-                return self._choices[np.argmax(self._weights)]
+                return self._choices[np.argmax(self._distribution.weights)]
             else:
                 # Case: Take the first option as default value
                 return self._choices[0]
@@ -162,20 +145,24 @@ class Categorical(Hyperparameter):
                 return True
         return False
 
-    def _check_distribution(self, distribution: Distribution) -> Distribution:
+    def _check_distribution(self, distribution: Union[Distribution, None]) -> Distribution:
         """
         Checks if the distribution is legal. A distribution is called legal, if the class of the distribution can be
         used for the given hyperparameter class.
 
         Args:
-            distribution (Distribution):
+            distribution (Union[Distribution, None]):
                 Distribution to check
 
         Returns:
             Distribution:
                 Legal distribution
         """
-        if self._is_legal_distribution(distribution):
+        if distribution is None:
+            # Case: Distribution is not given
+            return Choice(weights=np.ones(len(self._choices)))
+        elif self._is_legal_distribution(distribution):
+            # Case: Distribution is given and legal
             return distribution
         else:
             raise Exception(f"Illegal distribution {distribution}!")
@@ -186,58 +173,14 @@ class Categorical(Hyperparameter):
 
         Args:
             distribution (Distribution):
-                distribution to check
+                Distribution to check
 
         Returns:
             bool:
                 True if the given distribution can be used for the hyperparameter class
         """
         if isinstance(distribution, Choice):
-            return True
-        return False
-
-    def _check_weights(self, weights: Union[list[int], list[float], np.ndarray, None]) -> np.ndarray:
-        """
-        Checks if the given weights are legal. Weights are called legal, if (...)
-            - fulfills the right format [w1, w2, ...]
-            - length of weights and choices are equal
-            - for all w_i >= 0
-
-        and normalizes the weights to a probability distribution.
-
-        Args:
-            weights (Union[list[int], list[float], None]):
-                Weights to check
-
-        Returns:
-            np.ndarray:
-                Normalized weights
-        """
-        if weights is None:
-            return Categorical._normalize(np.array([1 for _ in range(len(self._choices))]))
-        elif self._is_legal_weights(weights):
-            return Categorical._normalize(np.array(weights))
-        else:
-            raise Exception(f"Illegal weights {weights}!")
-
-    def _is_legal_weights(self, weights: Union[list[int], list[float], np.ndarray]) -> bool:
-        """
-        Returns True if the given weights (...)
-            - fulfills the right format [w1, w2, ...]
-            - length of weights and choices are equal
-            - for all w_i >= 0
-
-        Args:
-            weights (Union[list[int], list[float], np.ndarray]):
-                Weights to check
-
-        Returns:
-            bool:
-                True if weights are legal
-        """
-        if isinstance(weights, (list, np.ndarray)) and len(weights) == len(self._choices) and \
-                all(0 <= w for w in weights):
-            return True
+            return np.isclose(sum(distribution.weights), 1) and distribution.weights.shape == (self._choices.shape[0],)
         return False
 
     def change_distribution(self, **kwargs):
@@ -248,12 +191,13 @@ class Categorical(Hyperparameter):
             **kwargs (dict):
                 Parameters that defines the distribution
         """
-        self._weights = self._check_weights(weights=kwargs["weights"])
+        self._distribution.change_distribution(**kwargs)
+        self._check_distribution(self._distribution)
 
     def sample(self, random: np.random.RandomState, size: Union[int, None] = None) -> Any:
         if isinstance(self._distribution, Choice):
             # Case: Sample from given distribution (with weights)
-            indices = random.choice(len(self._choices), size=size, replace=True, p=self._weights)
+            indices = random.choice(len(self._choices), size=size, replace=True, p=self._distribution.weights)
             if isinstance(indices, int):
                 # Case: Only a single sample should be returned
                 if len(self._shape) > 1:
@@ -283,18 +227,16 @@ class Categorical(Hyperparameter):
         return hash(self.__repr__())
 
     def __repr__(self) -> str:
-        text = f"Categorical({self._name}, choices={self._choices}, default={self._default}, weights={self._weights})"
+        text = f"Categorical({self._name}, choices={self._choices}, default={self._default}, distribution={self._distribution})"
         return text
 
     def __getstate__(self) -> dict:
         state = super().__getstate__()
         state["choices"] = self._choices
         state["distribution"] = self._distribution
-        state["weights"] = self._weights
         return state
 
     def __setstate__(self, state) -> dict:
         super().__setstate__(state)
         self._choices = state["choices"]
         self._distribution = state["distribution"]
-        self._weights = state["weights"]

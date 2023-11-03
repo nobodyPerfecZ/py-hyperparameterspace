@@ -220,31 +220,3 @@ class Hyperparameter(ABC):
         else:
             # Case: shape is a tuple
             return size, *shape
-
-    @classmethod
-    def _normalize(cls, p: Union[list[float], np.ndarray]) -> Union[list[float], np.ndarray]:
-        """
-        Normalizes the given probability distribution, so that sum(p)=1.
-
-        Args:
-            p (Union[list[float], np.ndarray]):
-                Non-normalized probability distribution
-
-        Returns:
-            Union[list[float], np.ndarray]:
-                Normalized probability distribution
-        """
-        assert all(0.0 <= prob for prob in p), \
-            "The given non-normalized dist p cannot contain negative values!"
-
-        if isinstance(p, list):
-            result_type = list
-        else:
-            result_type = np.array
-
-        sum_p = np.sum(p)
-        if sum_p == 1:
-            # Case: p is already normalized
-            return result_type(p)
-        # Case: p should be normalized
-        return result_type([prob / sum_p for prob in p])
