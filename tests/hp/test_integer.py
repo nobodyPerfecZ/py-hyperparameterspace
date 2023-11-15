@@ -141,6 +141,18 @@ class TestInteger(unittest.TestCase):
         self.assertIsInstance(self.hp3.get_distribution(), Uniform)
         self.assertIsInstance(self.hp4.get_distribution(), Uniform)
 
+    def test_change_distribution(self):
+        """
+        Tests the method change_distribution().
+        """
+        new_lb = -2
+        new_ub = 3
+        self.hp.change_distribution(lb=new_lb, ub=new_ub)
+
+        distribution = self.hp.get_distribution()
+        self.assertEqual(new_lb, distribution.lb)
+        self.assertEqual(new_ub, distribution.ub)
+
     def test_sample(self):
         """
         Tests the method sample().

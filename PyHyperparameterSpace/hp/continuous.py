@@ -25,7 +25,7 @@ class Continuous(Hyperparameter, ABC):
             shape (Union[int, tuple[int, ...], None]):
                 Shape of the hyperparameter
 
-            distribution (Distribution):
+            distribution (Union[Distribution, None]):
                 Distribution from where we sample new values for hyperparameter
     """
 
@@ -35,7 +35,7 @@ class Continuous(Hyperparameter, ABC):
             bounds: Union[tuple[int, int], tuple[float, float]],
             default: Any = None,
             shape: Union[tuple[int, ...], None] = None,
-            distribution: Union[Distribution, None] = Uniform(),
+            distribution: Union[Distribution, None] = None,
     ):
         # First set the variables
         self._bounds = bounds
@@ -172,7 +172,7 @@ class Float(Continuous):
             shape (Union[int, tuple[int, ...], None]):
                 Shape of the hyperparameter
 
-            distribution (Distribution):
+            distribution (Union[Distribution, None]):
                 Distribution from where we sample new values for hyperparameter
     """
 
@@ -182,7 +182,7 @@ class Float(Continuous):
             bounds: Union[tuple[float, float], tuple[int, int]],
             default: Union[int, float, list, np.ndarray] = None,
             shape: Union[tuple[int, ...], None] = None,
-            distribution: Distribution = Uniform(),
+            distribution: Distribution = None,
     ):
         if isinstance(default, list):
             default = np.array(default, dtype=float)
@@ -254,12 +254,14 @@ class Float(Continuous):
         return False
 
     def _check_distribution(self, distribution: Union[Distribution, None]) -> Union[Distribution, None]:
-        if self._is_legal_distribution(distribution):
+        if distribution is None:
+            return Uniform(lb=self.lb, ub=self.ub)
+        elif self._is_legal_distribution(distribution):
             return distribution
         else:
             raise Exception(f"Illegal distribution {distribution}. The argument should be in class of MatrixNormal(...), MultivariateNormal(...), Normal(...) or Uniform(...)!")
 
-    def _is_legal_distribution(self, distribution: Union[Distribution, None]) -> bool:
+    def _is_legal_distribution(self, distribution: Distribution) -> bool:
         if isinstance(distribution, MatrixNormal):
             # Case: Matrix normal distribution
             # Check if mean in between the bounds and shape should have a format of (n,p)
@@ -276,7 +278,8 @@ class Float(Continuous):
             return self.lb <= distribution.mean < self.ub
         elif isinstance(distribution, Uniform):
             # Case: Uniform distribution
-            return True
+            return self.lb <= distribution.lb < self.ub and self.lb <= distribution.ub <= self.ub and \
+                   distribution.lb < distribution.ub
         return False
 
     def change_distribution(self, **kwargs):
@@ -337,7 +340,7 @@ class Float(Continuous):
         elif isinstance(self._distribution, Uniform):
             # Case: Sample from uniform distribution
             sample_size = Float._get_sample_size(size=size, shape=self._shape)
-            sample = random.uniform(low=self.lb, high=self.ub, size=sample_size)
+            sample = random.uniform(low=self._distribution.lb, high=self._distribution.ub, size=sample_size)
             return sample
         else:
             raise Exception(f"Unknown Distribution {self._distribution}!")
@@ -382,7 +385,7 @@ class Integer(Continuous):
             shape (Union[int, tuple[int, ...], None]):
                 Shape of the hyperparameter
 
-            distribution (Distribution):
+            distribution (Union[Distribution, None]):
                 Distribution from where we sample new values for hyperparameter
     """
 
@@ -392,7 +395,7 @@ class Integer(Continuous):
             bounds: Union[tuple[int, int]],
             default: Union[int, list, np.ndarray, None] = None,
             shape: Union[tuple[int, ...], None] = None,
-            distribution: Distribution = Uniform(),
+            distribution: Distribution = None,
     ):
         super().__init__(name=name, shape=shape, bounds=bounds, default=default, distribution=distribution)
 
@@ -457,22 +460,37 @@ class Integer(Continuous):
             return True
         return False
 
-    def _check_distribution(self, distribution: Union[Distribution, None]) -> Union[Distribution, None]:
-        if self._is_legal_distribution(distribution):
+    def _check_distribution(self, distribution: Union[Distribution, None]) -> Distribution:
+        if distribution is None:
+            return Uniform(lb=self.lb, ub=self.ub)
+        elif self._is_legal_distribution(distribution):
             return distribution
         else:
             raise Exception(f"Illegal distribution {distribution}. The argument should have the class Uniform(...)!")
 
-    def _is_legal_distribution(self, distribution: Union[Distribution, None]) -> bool:
+    def _is_legal_distribution(self, distribution: Distribution) -> bool:
         if isinstance(distribution, Uniform):
             # Case: Uniform distribution
-            return True
+            return isinstance(distribution.lb, int) and isinstance(distribution.ub, int) and \
+                   self.lb <= distribution.lb < self.ub and self.lb <= distribution.ub <= self.ub and \
+                   distribution.lb < distribution.ub
         return False
+
+    def change_distribution(self, **kwargs):
+        """
+        Changes the distribution to the given parameters.
+
+        Args:
+            **kwargs (dict):
+                Parameters that defines the distribution
+        """
+        self._distribution.change_distribution(**kwargs)
+        self._check_distribution(self._distribution)
 
     def sample(self, random: np.random.RandomState, size: Union[int, None] = None) -> Any:
         if isinstance(self._distribution, Uniform):
             sample_size = Integer._get_sample_size(size=size, shape=self._shape)
-            sample = random.randint(low=self.lb, high=self.ub, size=sample_size)
+            sample = random.randint(low=self._distribution.lb, high=self._distribution.ub, size=sample_size)
             return sample
         else:
             raise Exception(f"Unknown Distribution {self._distribution}!")

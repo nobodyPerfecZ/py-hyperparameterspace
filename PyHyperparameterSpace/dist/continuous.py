@@ -131,14 +131,19 @@ class Uniform(Distribution):
     Class for representing a continuous2 Uniform dist ~U(a,b).
     """
 
-    def __init__(self):
-        pass
+    def __init__(self, lb: Union[int, float], ub: Union[int, float]):
+        self.lb = None
+        self.ub = None
 
-    def change_distribution(self, **kwargs):
-        raise Exception("Illegal call of change_distribution(). Uniform distribution cannot be changed!")
+        self.change_distribution(lb, ub)
+
+    def change_distribution(self, lb: Union[int, float], ub: Union[int, float]):
+        assert lb < ub, f"Illegal lb {lb} and ub {ub}. The arguments should have the right format (lb, ub), where lb < ub!"
+        self.lb = lb
+        self.ub = ub
 
     def __str__(self):
-        return "Uniform()"
+        return f"Uniform(lb={self.lb}, ub={self.ub})"
 
     def __repr__(self):
         return self.__str__()

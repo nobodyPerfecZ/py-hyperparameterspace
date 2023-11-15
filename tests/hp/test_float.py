@@ -28,7 +28,7 @@ class TestFloat(unittest.TestCase):
         self.multivariate_normal_distribution = MultivariateNormal(mean=[0, 0], cov=[[1, 0], [0, 100]])
         self.matrix_normal_distribution = MatrixNormal(M=[[0, 0], [0, 0]], U=[[1, 0], [0, 1]], V=[[1, 0], [0, 1]])
         self.normal_distribution = Normal(mean=0.0, std=10.0)
-        self.uniform_distribution = Uniform()
+        self.uniform_distribution = Uniform(*self.bounds)
 
         # Tests with all options given
         self.normal_hp = Float(name=self.name, shape=self.shape, bounds=self.bounds, default=self.default,
@@ -251,9 +251,17 @@ class TestFloat(unittest.TestCase):
         new_std = 1.5
         self.normal_hp.change_distribution(mean=new_mean, std=new_std)
 
+        new_lb = -0.5
+        new_ub = 0.5
+        self.uniform_hp.change_distribution(lb=new_lb, ub=new_ub)
+
         distribution = self.normal_hp.get_distribution()
         self.assertEqual(new_mean, distribution.mean)
         self.assertEqual(new_std, distribution.std)
+
+        distribution = self.uniform_hp.get_distribution()
+        self.assertEqual(new_lb, distribution.lb)
+        self.assertEqual(new_ub, distribution.ub)
 
     def test_sample(self):
         """
