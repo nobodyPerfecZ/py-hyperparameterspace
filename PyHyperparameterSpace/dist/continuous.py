@@ -7,6 +7,16 @@ from PyHyperparameterSpace.dist.abstract_dist import Distribution
 class MatrixNormal(Distribution):
     """
     Class for representing a Matrix Normal (Gaussian) Distribution ~M N_n,p(M, U, V)
+
+    Args:
+        M (Union[list[list[float]], np.ndarray]):
+            The mean matrix
+
+        U (Union[list[list[float]], np.ndarray]):
+            Covariance matrix for the rows
+
+        V (Union[list[list[float]], np.ndarray]):
+            Covariance matrix for the columns
     """
 
     def __init__(
@@ -30,11 +40,11 @@ class MatrixNormal(Distribution):
         U = np.array(U)
         V = np.array(V)
 
-        assert M.ndim == 2, f"Illegal M {M}. Argument should be a matrix of size (n, p)!"
+        assert M.ndim == 2, f"Illegal M {M}. The argument should be a matrix of size (n, p)!"
         assert U.ndim == 2 and U.shape == (M.shape[0], M.shape[0]), \
-            f"Illegal U {U}. Argument should be a matrix of size (n, n)!"
+            f"Illegal U {U}. The argument should be a matrix of size (n, n)!"
         assert V.ndim == 2 and V.shape == (M.shape[1], M.shape[1]), \
-            f"Illegal V {V}. Argument should be a matrix of size (p, p)!"
+            f"Illegal V {V}. The argument should be a matrix of size (p, p)!"
 
         self.M = M
         self.U = U
@@ -50,6 +60,13 @@ class MatrixNormal(Distribution):
 class MultivariateNormal(Distribution):
     """
     Class for representing a Multivariate Normal (Gaussian) Distribution ~N(mean, Covariance)
+
+        Args:
+            mean (Union[list[float], np.ndarray]):
+                The mean vector
+
+            cov (Union[list[list[float]], np.ndarray]):
+                The covariance matrix
     """
 
     def __init__(self, mean: Union[list[float], np.ndarray], cov: Union[list[list[float]], np.ndarray]):
@@ -80,6 +97,13 @@ class MultivariateNormal(Distribution):
 class Normal(Distribution):
     """
     Class for representing a Normal (Gaussian) Distribution ~N(mean, std).
+
+        Args:
+            mean (float):
+                The mean value
+
+            std (float):
+                The standard deviation
     """
 
     def __init__(self, mean: float, std: float):

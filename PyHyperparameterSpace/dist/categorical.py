@@ -8,18 +8,22 @@ from PyHyperparameterSpace.dist.abstract_dist import Distribution
 class Choice(Distribution):
     """
     Class for representing a Categorical choice dist.
+
+        Args:
+            weights (Union[list[float], np.ndarray]):
+                Probability distribution to select the item
     """
 
-    def __init__(self, weights: Union[list[float], list[int], np.ndarray]):
+    def __init__(self, weights: Union[list[float], np.ndarray]):
         self.weights = None
         self.change_distribution(weights)
 
-    def change_distribution(self, weights: Union[list[float], list[int], np.ndarray]):
+    def change_distribution(self, weights: Union[list[float], np.ndarray]):
         weights = np.array(weights)
 
         assert weights.ndim == 1, f"Illegal weights {weights}. Argument should be a matrix of size (n,)!"
         assert np.all(0.0 <= w for w in weights), \
-            f"Illegal weights {weights}. Each p inside weights should >= 0.0!"
+            f"Illegal weights {weights}. Each element inside weights should be higher or equal to 0.0!"
 
         # Normalize the weights
         self.weights = self._normalize(weights)

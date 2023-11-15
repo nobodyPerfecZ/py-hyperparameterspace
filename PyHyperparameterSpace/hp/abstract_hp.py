@@ -11,9 +11,14 @@ class Hyperparameter(ABC):
     Abstract class to represent a hyperparameter.
 
         Attributes:
-            name (str): name of the hyperparameter
-            default (Any): default value of the hyperparameter
-            shape (Union[int, tuple[int], None]): shape of the hyperparameter
+            name (str):
+                Name of the hyperparameter
+
+            default (Any):
+                Default value of the hyperparameter
+
+            shape (Union[int, tuple[int, ...], None]):
+                Shape of the hyperparameter
     """
 
     def __init__(
@@ -37,21 +42,24 @@ class Hyperparameter(ABC):
     def get_name(self) -> str:
         """
         Returns:
-            str: name of the hyperparameter
+            str:
+                Name of the hyperparameter
         """
         return self._name
 
     def get_default(self) -> Any:
         """
         Returns:
-            Any: default value of the hyperparameter
+            Any:
+                Default value of the hyperparameter
         """
         return self._default
 
     def get_shape(self) -> Union[int, tuple[int, ...], None]:
         """
         Returns:
-            Union[int, tuple[int, ...], None]: shape of the hyperparameter
+            Union[int, tuple[int, ...], None]:
+                Shape of the hyperparameter
         """
         return self._shape
 
@@ -68,10 +76,12 @@ class Hyperparameter(ABC):
             - if weights are not given: first option of choices
 
         Args:
-            default (Any): default value to check
+            default (Any):
+                Default value to check
 
         Returns:
-            Any: default value according to the description
+            Any:
+                Default value according to the description
         """
         pass
 
@@ -84,10 +94,12 @@ class Hyperparameter(ABC):
             - bounds and choices are not given (constant hyperparameter)
 
         Args:
-            default (Any): default value to check
+            default (Any):
+                Default value to check
 
         Returns:
-            bool: True if default value is legal, otherwise False
+            bool:
+                True if default value is legal, otherwise False
         """
         pass
 
@@ -102,10 +114,12 @@ class Hyperparameter(ABC):
         and has the same dimension as the given default value.
 
         Args:
-            shape (Union[int, tuple[int, ...], None]): shape to check
+            shape (Union[int, tuple[int, ...], None]):
+                Shape to check
 
         Returns:
-            Union[int, tuple[int, ...], None]: legal shape
+            Union[int, tuple[int, ...], None]:
+                Legal shape
         """
         pass
 
@@ -120,10 +134,12 @@ class Hyperparameter(ABC):
         and has the same dimension as the given default value.
 
         Args:
-            shape (Union[int, tuple[int, ...], None]): shape to check
+            shape (Union[int, tuple[int, ...], None]):
+                Shape to check
 
         Returns:
-            bool: True if given shape is legal
+            bool:
+                True if given shape is legal
         """
         pass
 
@@ -133,11 +149,15 @@ class Hyperparameter(ABC):
         Returns a sample of values from the given hyperparameter, according to the given distribution.
 
         Args:
-            random (np.random.RandomState): random generator for the sampling procedure
-            size (Union[int, None]): number of samples
+            random (np.random.RandomState):
+                Random generator for the sampling procedure
+
+            size (Union[int, None]):
+                Number of samples
 
         Returns:
-            Any: sample of values from the given hyperparameter
+            Any:
+                Sample of values from the given hyperparameter
         """
         pass
 
@@ -148,7 +168,7 @@ class Hyperparameter(ABC):
 
         Args:
             value (Any):
-                The configuration you want to check.
+                The configuration you want to check
 
         Returns:
             bool:
@@ -202,11 +222,11 @@ class Hyperparameter(ABC):
             Union[int, tuple[int, ...]]:
                 Shape of the samples
         """
-        assert size is None or size > 0, "#ERROR_HYPERPARAMETER: size should be None or higher than 0!"
+        assert size is None or size > 0, f"Illegal size {size}. The argument should be None or higher than 0!"
         if isinstance(shape, int):
-            assert shape > 0, "#ERROR_HYPERPARAMETER: shape should be higher than 0!"
+            assert shape > 0, f"Illegal shape {shape}. The argument should be higher than 0!"
         elif isinstance(shape, tuple):
-            assert all(s > 0 for s in shape), "#ERROR_HYPERPARAMETER: shape should be higher than 0!"
+            assert all(s > 0 for s in shape), f"Illegal shape {shape}. The argument should be higher than 0!"
 
         if shape == 1 or shape == (1,):
             # Case: Shape of the hyperparameter is just a single value
