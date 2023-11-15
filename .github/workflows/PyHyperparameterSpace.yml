@@ -2,12 +2,9 @@ name: Build & Test PyHyperparameterSpace
 
 on:
   push:
-    paths: [
-      "PyHyperparameterSpace",
-      "PyHyperparameterSpace/*",
-      "tests",
-      "tests/*"
-    ]
+    paths:
+      - "PyHyperparameterSpace/**"
+      - "tests/**"
 
 jobs:
   job:

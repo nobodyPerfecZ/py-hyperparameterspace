@@ -15,7 +15,7 @@ class Hyperparameter(ABC):
             default (Any):
                 Default value of the hyperparameter
 
-            shape (Union[int, tuple[int, ...], None]):
+            shape (Union[tuple[int, ...], None]):
                 Shape of the hyperparameter
     """
 
