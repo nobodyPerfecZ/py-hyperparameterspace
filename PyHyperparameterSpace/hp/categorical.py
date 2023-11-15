@@ -205,7 +205,7 @@ class Categorical(Hyperparameter):
                     return self._choices[indices]
             return np.array([self._choices[idx] for idx in indices])
         else:
-            raise Exception(f"Unknown Probability Distribution {self._distribution}!")
+            raise Exception(f"Unknown Distribution {self._distribution}!")
 
     def valid_configuration(self, value: Any) -> bool:
         if isinstance(value, (list, np.ndarray)):

@@ -204,14 +204,12 @@ class Float(Continuous):
             return False
 
     def _check_default(self, default: Union[int, float, np.ndarray]) -> Union[int, float, np.ndarray]:
-        if default is None:
-            # Case: default is not given
-            if self._shape is None or self._shape == 1 or self._shape == (1,):
-                # Case: default should be single dimensional
-                return (self.lb + self.ub) / 2
-            else:
-                # Case: default should be multidimensional
-                return np.full(shape=self._shape, fill_value=((self.lb + self.ub) / 2))
+        if default is None and self._shape == (1,):
+            # Case: default is not given and shape refers to single dimensional values
+            return (self.lb + self.ub) / 2
+        elif default is None and self._shape is not None and all(isinstance(s, (int, np.int_)) for s in self._shape):
+            # Case: default is not given and shape refers to multi dimensional values
+            return np.full(shape=self._shape, fill_value=((self.lb + self.ub) / 2))
         elif self._is_legal_default(default):
             return default
         else:
@@ -342,7 +340,7 @@ class Float(Continuous):
             sample = random.uniform(low=self.lb, high=self.ub, size=sample_size)
             return sample
         else:
-            raise Exception("Unknown Distribution!")
+            raise Exception(f"Unknown Distribution {self._distribution}!")
 
     def valid_configuration(self, value: Any) -> bool:
         if isinstance(value, (list, np.ndarray)):
@@ -412,20 +410,18 @@ class Integer(Continuous):
             return False
 
     def _check_default(self, default: Union[int, np.ndarray]) -> Union[int, np.ndarray]:
-        if default is None:
-            # Case: default is not given
-            if self._shape is None or self._shape == 1 or self._shape == (1,):
-                # Case: shape refers to single dimensional
-                return int((self.lb + self.ub) / 2)
-            else:
-                # Case: Shape refers to multidimensional
-                return np.full(shape=self._shape, fill_value=int((self.lb + self.ub) / 2))
+        if default is None and self._shape == (1,):
+            # Case: default is not given and shape refers to single dimensional values
+            return int((self.lb + self.ub) / 2)
+        elif default is None and self._shape is not None and all(isinstance(s, (int, np.int_)) for s in self._shape):
+            # Case: default is not given and shape refers to multidimensional values
+            return np.full(shape=self._shape, fill_value=int((self.lb + self.ub) / 2))
         elif self._is_legal_default(default):
             # Case: default value is legal
             return default
         else:
             # Case: default value is illegal
-            raise Exception(f"Illegal default value {default}!")
+            raise Exception(f"Illegal default {default}. The argument should be in between the bounds (lower, upper)!")
 
     def _is_legal_default(self, default: Union[int, np.ndarray]) -> bool:
         if not isinstance(default, int) and \
@@ -479,7 +475,7 @@ class Integer(Continuous):
             sample = random.randint(low=self.lb, high=self.ub, size=sample_size)
             return sample
         else:
-            raise Exception("Unknown Distribution!")
+            raise Exception(f"Unknown Distribution {self._distribution}!")
 
     def valid_configuration(self, value: Any) -> bool:
         if isinstance(value, (list, np.ndarray)):
