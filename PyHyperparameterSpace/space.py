@@ -11,10 +11,13 @@ class HyperparameterConfigurationSpace(Mapping[str, Hyperparameter]):
     Class to represent a hyperparameter configuration space, where the logic behind the sampling procedure is happening.
 
         Attributes:
-            values (Mapping[str, Hyperparameter]): dictionary, where
-                - key := name of hyperparameter
-                - value := hyperparameter object
-            seed (Union[int, None]): random state of the generator (useful for reproducibility)
+            values (Mapping[str, Hyperparameter]):
+                Dictionary, where
+                    - key := name of hyperparameter
+                    - value := hyperparameter object
+
+            seed (Union[int, None]):
+                Random state of the generator (useful for reproducibility)
     """
 
     def __init__(
@@ -25,17 +28,26 @@ class HyperparameterConfigurationSpace(Mapping[str, Hyperparameter]):
         self._values = values
         self._random = np.random.RandomState(seed)
 
+    def get_random_state(self) -> np.random.RandomState:
+        """
+        Returns:
+            np.random.RandomState:
+                Random state of the generator (useful for reproducibility)
+        """
+        return self._random
+
     def add_hyperparameter(self, hyperparameter: Hyperparameter):
         """
         Adds a hyperparameter to the configuration space.
 
         Args:
-            hyperparameter (Hyperparameter): hyperparameter to add
+            hyperparameter (Hyperparameter):
+                Hyperparameter to add
         """
         hp_name = hyperparameter.get_name()
         if self._values.get(hp_name) is not None:
             # Case: hyperparameter already exist
-            raise Exception(f"#ERROR_SPACE: hyperparameter with the name={hp_name} already exists!")
+            raise Exception(f"Illegal hyperparameter {hyperparameter}. The argument with the name={hp_name} already exists!")
         self._values[hp_name] = hyperparameter
 
     def add_hyperparameters(self, hyperparameters: Iterable[Hyperparameter]):
@@ -43,7 +55,8 @@ class HyperparameterConfigurationSpace(Mapping[str, Hyperparameter]):
         Adds a list of hyperparameters to the configuration space.
 
         Args:
-            hyperparameters (Iterable): list of hyperparameters
+            hyperparameters (Iterable):
+                List of hyperparameters
         """
         for hp in hyperparameters:
             self.add_hyperparameter(hp)
@@ -62,12 +75,14 @@ class HyperparameterConfigurationSpace(Mapping[str, Hyperparameter]):
         Returns a sample of configurations (set of hyperparameters).
 
         Args:
-            size (Union[int, Iterable, tuple[int], None]): number of configurations to be drawn
+            size (Union[int, Iterable, tuple[int], None]):
+                Number of configurations to be drawn
 
         Returns:
-            Union[HyperparameterConfiguration, list[HyperparameterConfiguration]]: single or a list of configurations
+            Union[HyperparameterConfiguration, list[HyperparameterConfiguration]]:
+                Single or a list of configurations
         """
-        assert size is None or size > 0, f"Illegal size {size}"
+        assert size is None or size > 0, f"Illegal size {size}. The argument should be higher or equal to 0!"
 
         if size is None:
             # Case: Sample one configuration
@@ -91,7 +106,8 @@ class HyperparameterConfigurationSpace(Mapping[str, Hyperparameter]):
         Returns the configuration that contains all default values for each hyperparameter.
 
         Returns:
-            HyperparameterConfiguration: configuration contains all default values for each hyperparameter
+            HyperparameterConfiguration:
+                Configuration contains all default values for each hyperparameter
         """
         assert size is None or size > 0, f"Illegal size {size}"
 

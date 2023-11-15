@@ -143,6 +143,24 @@ class Continuous(Hyperparameter, ABC):
         """
         pass
 
+    @abstractmethod
+    def adjust_configuration(self, value: Any) -> Any:
+        """
+        Adjusts the given value of the hyperparameter by the given bounds.
+
+        If value is under the lower bound than it will be assigned to the lower bound.
+        If value is above the upper bound than it will be assigned next to the upper bound (but not equal to).
+
+        Args:
+            value (Any):
+                Value to adjust according to the given bounds
+
+        Returns:
+            Any:
+                Adjusted value according to the given bounds
+        """
+        pass
+
     def __getstate__(self) -> dict:
         state = super().__getstate__()
         state["bounds"] = self._bounds
@@ -194,7 +212,8 @@ class Float(Continuous):
         if self._is_legal_bounds(bounds):
             return bounds
         else:
-            raise Exception(f"Illegal bounds {bounds}. The argument should have the format (lower, upper), where lower < upper!")
+            raise Exception(
+                f"Illegal bounds {bounds}. The argument should have the format (lower, upper), where lower < upper!")
 
     def _is_legal_bounds(self, bounds: Union[tuple[float, float], tuple[int, int]]):
         if isinstance(bounds, tuple) and len(bounds) == 2 and \
@@ -259,7 +278,8 @@ class Float(Continuous):
         elif self._is_legal_distribution(distribution):
             return distribution
         else:
-            raise Exception(f"Illegal distribution {distribution}. The argument should be in class of MatrixNormal(...), MultivariateNormal(...), Normal(...) or Uniform(...)!")
+            raise Exception(
+                f"Illegal distribution {distribution}. The argument should be in class of MatrixNormal(...), MultivariateNormal(...), Normal(...) or Uniform(...)!")
 
     def _is_legal_distribution(self, distribution: Distribution) -> bool:
         if isinstance(distribution, MatrixNormal):
@@ -301,10 +321,8 @@ class Float(Continuous):
                 cov=np.kron(self._distribution.U, self._distribution.V),
                 size=size
             )
+            sample = self.adjust_configuration(sample)
 
-            # Do not exceed lower, upper bound
-            sample[sample < self.lb] = self.lb
-            sample[sample >= self.ub] = self.ub - 1e-10
             # Reshape the samples into matrices
             if size is None:
                 sample = sample.reshape(self._distribution.M.shape[0], self._distribution.M.shape[1])
@@ -314,33 +332,19 @@ class Float(Continuous):
         elif isinstance(self._distribution, MultivariateNormal):
             # Case: Sample from multivariate normal distribution
             sample = random.multivariate_normal(mean=self._distribution.mean, cov=self._distribution.cov, size=size)
-
-            # Do not exceed lower, upper bound
-            sample[sample < self.lb] = self.lb
-            sample[sample >= self.ub] = self.ub - 1e-10
-
+            sample = self.adjust_configuration(sample)
             return sample
         elif isinstance(self._distribution, Normal):
             # Case: Sample from normal distribution
             sample_size = Float._get_sample_size(size=size, shape=self._shape)
             sample = random.normal(loc=self._distribution.mean, scale=self._distribution.std, size=sample_size)
-
-            # Do not exceed lower, upper bound
-            if isinstance(sample, float):
-                # Case: Sample is a single value
-                if sample < self.lb:
-                    sample = self.lb
-                elif sample >= self.ub:
-                    sample = self.ub - 1e-10
-            else:
-                # Case: Sample is a numpy array
-                sample[sample < self.lb] = self.lb
-                sample[sample >= self.ub] = self.ub - 1e-10
+            sample = self.adjust_configuration(sample)
             return sample
         elif isinstance(self._distribution, Uniform):
             # Case: Sample from uniform distribution
             sample_size = Float._get_sample_size(size=size, shape=self._shape)
             sample = random.uniform(low=self._distribution.lb, high=self._distribution.ub, size=sample_size)
+            sample = self.adjust_configuration(sample)
             return sample
         else:
             raise Exception(f"Unknown Distribution {self._distribution}!")
@@ -354,6 +358,30 @@ class Float(Continuous):
             # Case: value is single dimensional
             return self.lb <= value < self.ub
         return False
+
+    def adjust_configuration(self, value: Any) -> Any:
+        if isinstance(value, (list, np.ndarray)) and \
+                (np.issubdtype(value.dtype, np.float_) or np.issubdtype(value.dtype, np.int_)):
+            # Case: value is multidimensional
+            value = np.array(value)
+
+            # Do not exceed lower, upper bound
+            value[value < self.lb] = self.lb
+            value[value >= self.ub] = self.ub - 1e-10
+
+            return value
+        elif isinstance(value, (int, float, np.int_, np.float_)):
+            # Case: value is single dimensional
+            if value < self.lb:
+                value = self.lb
+            elif value >= self.ub:
+                value = self.ub - 1e-10
+
+            return value
+        else:
+            # Case: value is illegal
+            raise Exception(
+                f"Illegal value {value}. The argument should be inside the bounds ({self._lb}, {self._ub})!")
 
     def __eq__(self, other: Any) -> bool:
         if isinstance(other, self.__class__):
@@ -449,7 +477,8 @@ class Integer(Continuous):
             # Case: shape is given
             return shape
         else:
-            raise Exception(f"Illegal shape {shape}. The argument should be in the format (lower, upper), where lower < upper!")
+            raise Exception(
+                f"Illegal shape {shape}. The argument should be in the format (lower, upper), where lower < upper!")
 
     def _is_legal_shape(self, shape: tuple[int, ...]) -> bool:
         if shape == (1,) and isinstance(self._default, (int, np.int_)):
@@ -491,6 +520,7 @@ class Integer(Continuous):
         if isinstance(self._distribution, Uniform):
             sample_size = Integer._get_sample_size(size=size, shape=self._shape)
             sample = random.randint(low=self._distribution.lb, high=self._distribution.ub, size=sample_size)
+            sample = self.adjust_configuration(sample)
             return sample
         else:
             raise Exception(f"Unknown Distribution {self._distribution}!")
@@ -505,6 +535,28 @@ class Integer(Continuous):
             return self.lb <= value < self.ub
         else:
             return False
+
+    def adjust_configuration(self, value: Any) -> Any:
+        if isinstance(value, (list, np.ndarray)) and np.issubdtype(value.dtype, np.int_):
+            # Case: value is multidimensional
+            value = np.array(value)
+
+            # Do not exceed lower, upper bound
+            value[value < self.lb] = self.lb
+            value[value >= self.ub] = self.ub - 1
+
+            return value
+        elif isinstance(value, (int, np.int_)):
+            # Case: value is single dimensional
+            if value < self.lb:
+                value = self.lb
+            elif value >= self.ub:
+                value = self.ub - 1
+            return value
+        else:
+            # Case: value is illegal
+            raise Exception(
+                f"Illegal value {value}. The argument should be inside the bounds ({self._lb}, {self._ub})!")
 
     def __eq__(self, other: Any) -> bool:
         if isinstance(other, self.__class__):

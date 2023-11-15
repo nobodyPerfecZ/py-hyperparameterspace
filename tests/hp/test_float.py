@@ -303,6 +303,18 @@ class TestFloat(unittest.TestCase):
         self.assertTrue(self.normal_hp.valid_configuration(self.default))
         self.assertFalse(self.normal_hp.valid_configuration(self.default3))
 
+    def test_adjust_configuration(self):
+        """
+        Tests the method adjust_configuration().
+        """
+        value1 = self.normal_hp.adjust_configuration(self.normal_hp.lb - 1.5)
+        value2 = self.normal_hp.adjust_configuration(self.normal_hp.ub + 1.5)
+        value3 = self.normal_hp.adjust_configuration(np.array([self.normal_hp.lb - 1.5, self.normal_hp.ub + 1.5]))
+
+        self.assertEqual(value1, self.normal_hp.lb)
+        self.assertEqual(value2, self.normal_hp.ub - 1e-10)
+        self.assertTrue(np.array_equal(np.array([self.normal_hp.lb, self.normal_hp.ub - 1e-10]), value3))
+
     def test_eq(self):
         """
         Tests the magic function __eq__.

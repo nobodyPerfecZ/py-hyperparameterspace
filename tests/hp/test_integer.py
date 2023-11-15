@@ -183,6 +183,18 @@ class TestInteger(unittest.TestCase):
         self.assertTrue(self.hp.valid_configuration(self.default))
         self.assertFalse(self.hp.valid_configuration(self.default2))
 
+    def test_adjust_configuration(self):
+        """
+        Tests the method adjust_configuration().
+        """
+        value1 = self.hp.adjust_configuration(self.hp.lb - 3)
+        value2 = self.hp.adjust_configuration(self.hp.ub + 3)
+        value3 = self.hp.adjust_configuration(np.array([self.hp.lb - 3, self.hp.ub + 3]))
+
+        self.assertEqual(value1, self.hp.lb)
+        self.assertEqual(value2, self.hp.ub - 1)
+        self.assertTrue(np.array_equal(np.array([self.hp.lb, self.hp.ub - 1]), value3))
+
     def test_eq(self):
         """
         Tests the magic function __eq__.
