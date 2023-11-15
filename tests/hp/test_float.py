@@ -90,7 +90,7 @@ class TestFloat(unittest.TestCase):
         self.assertEqual(self.shape2, self.uniform_hp2._shape)
         self.assertEqual(self.shape2, self.uniform_hp3._shape)
         self.assertEqual(self.shape2, self.uniform_hp4._shape)
-        self.assertEquals(self.shape3, self.multivariate_normal_hp._shape)
+        self.assertEqual(self.shape3, self.multivariate_normal_hp._shape)
         self.assertEqual(self.shape2, self.matrix_normal_hp._shape)
 
     def test_bounds(self):
