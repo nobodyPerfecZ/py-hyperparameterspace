@@ -1,8 +1,9 @@
-from typing import Mapping, Iterator, Any, Union, Iterable
+from typing import Any, Iterable, Iterator, Mapping, Union
+
 import numpy as np
 
-from PyHyperparameterSpace.hp.abstract_hp import Hyperparameter
 from PyHyperparameterSpace.configuration import HyperparameterConfiguration
+from PyHyperparameterSpace.hp.abstract_hp import Hyperparameter
 
 
 class HyperparameterConfigurationSpace(Mapping[str, Hyperparameter]):

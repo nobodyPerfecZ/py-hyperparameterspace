@@ -1,13 +1,14 @@
+import os
 import unittest
-import numpy as np
+
 import yaml
 
-from PyHyperparameterSpace.space import HyperparameterConfigurationSpace
-from PyHyperparameterSpace.hp.continuous import Float, Integer
-from PyHyperparameterSpace.hp.categorical import Categorical
-from PyHyperparameterSpace.hp.constant import Constant
 from PyHyperparameterSpace.configuration import HyperparameterConfiguration
 from PyHyperparameterSpace.dist.categorical import Choice
+from PyHyperparameterSpace.hp.categorical import Categorical
+from PyHyperparameterSpace.hp.constant import Constant
+from PyHyperparameterSpace.hp.continuous import Float, Integer
+from PyHyperparameterSpace.space import HyperparameterConfigurationSpace
 
 
 class TestHyperparameterConfiguration(unittest.TestCase):
@@ -18,11 +19,11 @@ class TestHyperparameterConfiguration(unittest.TestCase):
     def setUp(self) -> None:
         self.cs = HyperparameterConfigurationSpace(
             values={
-                "X1": Float("X1", bounds=(-10.5, 10.5), default=2.25, shape=(1,)),
+                "X1": Float("X1", bounds=(-10.5, 10.5), default=2.25),
                 "X2": Categorical("X2", choices=[True, False], default=True),
-                "X3": Integer("X3", bounds=(-10, 10), default=-5, shape=(1,)),
+                "X3": Integer("X3", bounds=(-10, 10), default=-5),
                 "X4": Categorical("X4", choices=["attr1", "attr2", "attr3"], default="attr1", distribution=Choice([0.3, 0.4, 0.3])),
-                "X5": Constant("X5", default="X_Const", shape=(1,)),
+                "X5": Constant("X5", default="X_Const"),
             },
             seed=0,
         )
@@ -104,6 +105,9 @@ class TestHyperparameterConfiguration(unittest.TestCase):
 
         # Check if they are equal
         self.assertEqual(cfg, self.cfg)
+
+        # Delete the yaml file
+        os.remove("test_data.yaml")
 
 
 if __name__ == '__main__':

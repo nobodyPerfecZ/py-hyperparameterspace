@@ -1,9 +1,11 @@
+import os
 import unittest
+
 import numpy as np
 import yaml
 
-from PyHyperparameterSpace.hp.continuous import Float
 from PyHyperparameterSpace.dist.continuous import MatrixNormal, MultivariateNormal, Normal, Uniform
+from PyHyperparameterSpace.hp.continuous import Float
 
 
 class TestFloat(unittest.TestCase):
@@ -335,6 +337,9 @@ class TestFloat(unittest.TestCase):
 
         # Check if they are equal
         self.assertEqual(hp, self.normal_hp)
+
+        # Delete the yaml file
+        os.remove("test_data.yaml")
 
 
 if __name__ == '__main__':

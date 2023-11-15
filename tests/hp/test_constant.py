@@ -1,4 +1,6 @@
+import os
 import unittest
+
 import numpy as np
 import yaml
 
@@ -142,6 +144,9 @@ class TestConstant(unittest.TestCase):
 
         # Check if they are equal
         self.assertEqual(hp, self.hp)
+
+        # Delete the yaml file
+        os.remove("test_data.yaml")
 
 
 if __name__ == '__main__':

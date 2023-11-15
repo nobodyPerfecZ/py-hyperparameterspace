@@ -1,9 +1,11 @@
+import os
 import unittest
+
 import numpy as np
 import yaml
 
-from PyHyperparameterSpace.hp.continuous import Integer
 from PyHyperparameterSpace.dist.continuous import Uniform
+from PyHyperparameterSpace.hp.continuous import Integer
 
 
 class TestInteger(unittest.TestCase):
@@ -201,6 +203,9 @@ class TestInteger(unittest.TestCase):
 
         # Check if they are equal
         self.assertEqual(hp, self.hp)
+
+        # Delete the yaml file
+        os.remove("test_data.yaml")
 
 
 if __name__ == '__main__':

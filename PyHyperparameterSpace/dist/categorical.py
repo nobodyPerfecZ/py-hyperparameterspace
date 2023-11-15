@@ -1,6 +1,6 @@
 from typing import Union
-import numpy as np
 
+import numpy as np
 
 from PyHyperparameterSpace.dist.abstract_dist import Distribution
 

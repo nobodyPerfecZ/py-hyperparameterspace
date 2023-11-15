@@ -1,14 +1,16 @@
+import os
 import unittest
+
 import numpy as np
 import yaml
 
-from PyHyperparameterSpace.space import HyperparameterConfigurationSpace
-from PyHyperparameterSpace.space import HyperparameterConfiguration
-from PyHyperparameterSpace.hp.continuous import Float, Integer
+from PyHyperparameterSpace.dist.categorical import Choice
+from PyHyperparameterSpace.dist.continuous import Normal
 from PyHyperparameterSpace.hp.categorical import Categorical
 from PyHyperparameterSpace.hp.constant import Constant
-from PyHyperparameterSpace.dist.continuous import Normal, Uniform
-from PyHyperparameterSpace.dist.categorical import Choice
+from PyHyperparameterSpace.hp.continuous import Float, Integer
+from PyHyperparameterSpace.space import HyperparameterConfiguration
+from PyHyperparameterSpace.space import HyperparameterConfigurationSpace
 
 
 class TestHyperparameterConfigurationSpace(unittest.TestCase):
@@ -154,6 +156,9 @@ class TestHyperparameterConfigurationSpace(unittest.TestCase):
 
         # Check if they are equal
         self.assertEqual(cs, self.cs)
+
+        # Delete the yaml file
+        os.remove("test_data.yaml")
 
 
 if __name__ == '__main__':

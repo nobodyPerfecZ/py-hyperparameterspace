@@ -1,10 +1,11 @@
-from typing import Union, Iterable, Any
 from abc import ABC, abstractmethod
+from typing import Any, Union
+
 import numpy as np
 
+from PyHyperparameterSpace.dist.abstract_dist import Distribution
 from PyHyperparameterSpace.dist.continuous import MatrixNormal, MultivariateNormal, Normal, Uniform
 from PyHyperparameterSpace.hp.abstract_hp import Hyperparameter
-from PyHyperparameterSpace.dist.abstract_dist import Distribution
 
 
 class Continuous(Hyperparameter, ABC):
@@ -33,7 +34,7 @@ class Continuous(Hyperparameter, ABC):
             name: str,
             bounds: Union[tuple[int, int], tuple[float, float]],
             default: Any = None,
-            shape: Union[int, tuple[int, ...], None] = None,
+            shape: Union[tuple[int, ...], None] = None,
             distribution: Union[Distribution, None] = Uniform(),
     ):
         # First set the variables
@@ -180,7 +181,7 @@ class Float(Continuous):
             name: str,
             bounds: Union[tuple[float, float], tuple[int, int]],
             default: Union[int, float, list, np.ndarray] = None,
-            shape: Union[int, tuple[int, ...], None] = None,
+            shape: Union[tuple[int, ...], None] = None,
             distribution: Distribution = Uniform(),
     ):
         if isinstance(default, list):
@@ -193,11 +194,11 @@ class Float(Continuous):
         if self._is_legal_bounds(bounds):
             return bounds
         else:
-            raise Exception(f"Illegal bounds {bounds}!")
+            raise Exception(f"Illegal bounds {bounds}. The argument should have the format (lower, upper), where lower < upper!")
 
     def _is_legal_bounds(self, bounds: Union[tuple[float, float], tuple[int, int]]):
         if isinstance(bounds, tuple) and len(bounds) == 2 and \
-                all(isinstance(b, (float, int)) for b in bounds) and bounds[0] < bounds[1]:
+                all(isinstance(b, (float, int, np.int_, np.float_)) for b in bounds) and bounds[0] < bounds[1]:
             return True
         else:
             return False
@@ -214,15 +215,15 @@ class Float(Continuous):
         elif self._is_legal_default(default):
             return default
         else:
-            raise Exception(f"Illegal default value {default}!")
+            raise Exception(f"Illegal default {default}. The argument should be in between the bounds (lower, upper)!")
 
     def _is_legal_default(self, default: Any) -> bool:
-        if not isinstance(default, (float, int)) and \
+        if not isinstance(default, (float, int, np.int_, np.float_)) and \
                 not (isinstance(default, np.ndarray) and np.issubdtype(default.dtype, np.floating)) and \
                 not (isinstance(default, np.ndarray) and np.issubdtype(default.dtype, np.integer)):
             # Case: default is not in the right format
             return False
-        if isinstance(default, (float, int)):
+        if isinstance(default, (float, int, np.int_, np.float_)):
             # Case: default is single dimensional
             return self.lb <= default < self.ub
         elif isinstance(default, np.ndarray):
@@ -230,43 +231,35 @@ class Float(Continuous):
             return np.all((default >= self.lb) & (default < self.ub))
         return False
 
-    def _check_shape(self, shape: Union[int, tuple[int, ...]]) -> Union[int, tuple[int, ...]]:
-        if shape is None:
-            # Case: Adjust the shape according to the given default value
-            if self._default is None or isinstance(self._default, (float, int)):
-                # Case: default is not given or single dimensional
-                return (1,)
-            elif isinstance(self._default, np.ndarray):
-                # Case: default is multidimensional
-                return self._default.shape
+    def _check_shape(self, shape: Union[tuple[int, ...], None]) -> tuple[int, ...]:
+        if shape is None and isinstance(self._default, (float, int, np.int_, np.float_)):
+            # Case: shape is not given and default is single dimensional
+            return 1,
+        elif shape is None and isinstance(self._default, np.ndarray):
+            # Case: shape is not given and default is multidimensional
+            return self._default.shape
         elif self._is_legal_shape(shape):
+            # Case: shape is given and legal
             return shape
         else:
-            raise Exception(f"Illegal shape {shape}!")
+            # Case: shape is illegal
+            raise Exception(f"Illegal shape {shape}. The argument should have the right format (dim1, ...)!")
 
-    def _is_legal_shape(self, shape: Union[int, tuple[int, ...]]) -> bool:
-        if shape == 1 or shape == (1,):
-            # Case: shape refers to single dimensional
-            if isinstance(self._default, (float, int)):
-                # Case: default is single dimensional
-                return True
-        elif isinstance(shape, int):
-            # Case: shape refers to array-like dimensional
-            if isinstance(self._default, np.ndarray) and shape == len(self._default) and self._default.ndim == 1:
-                # Case: default is array-like dimensional
-                return True
-        elif isinstance(shape, tuple) and all(isinstance(s, int) for s in shape):
-            # Case: shape refers to multidimensional
-            if isinstance(self._default, np.ndarray) and shape == self._default.shape:
-                # Case: default is multidimensional
-                return True
+    def _is_legal_shape(self, shape: tuple[int, ...]) -> bool:
+        if shape == (1,) and isinstance(self._default, (float, int, np.int_, np.float_)):
+            # Case: shape and default refers to single dimensional
+            return True
+        elif isinstance(shape, tuple) and all(isinstance(s, int) for s in shape) and \
+                isinstance(self._default, np.ndarray) and shape == self._default.shape:
+            # Case: shape and default refers to multidimensional
+            return True
         return False
 
     def _check_distribution(self, distribution: Union[Distribution, None]) -> Union[Distribution, None]:
         if self._is_legal_distribution(distribution):
             return distribution
         else:
-            raise Exception(f"Illegal distribution {distribution}!")
+            raise Exception(f"Illegal distribution {distribution}. The argument should be in class of MatrixNormal(...), MultivariateNormal(...), Normal(...) or Uniform(...)!")
 
     def _is_legal_distribution(self, distribution: Union[Distribution, None]) -> bool:
         if isinstance(distribution, MatrixNormal):
@@ -349,7 +342,7 @@ class Float(Continuous):
             sample = random.uniform(low=self.lb, high=self.ub, size=sample_size)
             return sample
         else:
-            raise Exception("Unknown Probability Distribution!")
+            raise Exception("Unknown Distribution!")
 
     def valid_configuration(self, value: Any) -> bool:
         if isinstance(value, (list, np.ndarray)):
@@ -400,20 +393,20 @@ class Integer(Continuous):
             name: str,
             bounds: Union[tuple[int, int]],
             default: Union[int, list, np.ndarray, None] = None,
-            shape: Union[int, tuple[int, ...], None] = None,
+            shape: Union[tuple[int, ...], None] = None,
             distribution: Distribution = Uniform(),
     ):
         super().__init__(name=name, shape=shape, bounds=bounds, default=default, distribution=distribution)
 
-    def _check_bounds(self, bounds: Union[tuple[int, int], None]) -> Union[tuple[int], tuple[float], None]:
+    def _check_bounds(self, bounds: tuple[int, int]) -> tuple[int, int]:
         if self._is_legal_bounds(bounds):
             return bounds
         else:
             raise Exception(f"Illegal bounds {bounds}!")
 
-    def _is_legal_bounds(self, bounds: Union[tuple[int], tuple[float], None]) -> bool:
+    def _is_legal_bounds(self, bounds: tuple[int, int]) -> bool:
         if isinstance(bounds, tuple) and len(bounds) == 2 and \
-                all(isinstance(b, int) for b in bounds) and bounds[0] < bounds[1]:
+                all(isinstance(b, (int, np.int_)) for b in bounds) and bounds[0] < bounds[1]:
             return True
         else:
             return False
@@ -439,50 +432,40 @@ class Integer(Continuous):
                 not (isinstance(default, np.ndarray) and np.issubdtype(default.dtype, np.integer)):
             # Case: default is not in the right format!
             return False
-        if isinstance(default, int):
+        if isinstance(default, (int, np.int_)):
             # Case: default is single dimensional
             return self.lb <= default <= self.ub
         else:
             # Case: default is multidimensional
             return np.all((default >= self.lb) & (default <= self.ub))
 
-    def _check_shape(self, shape: Union[int, tuple[int, ...]]) -> Union[int, tuple[int, ...]]:
-        if shape is None:
-            # Case: Adjust the shape according to the given default value
-            if self._default is None or isinstance(self._default, int):
-                # Case: default is not given or single dimensional
-                return (1,)
-            elif isinstance(self._default, np.ndarray):
-                # Case: default is multidimensional
-                return self._default.shape
+    def _check_shape(self, shape: Union[tuple[int, ...], None]) -> tuple[int, ...]:
+        if shape is None and isinstance(self._default, (int, np.int_)):
+            # Case: shape is not given and default is single dimensional
+            return 1,
+        elif shape is None and isinstance(self._default, np.ndarray):
+            # Case: shape is not given and default is multidimensional
+            return self._default.shape
         elif self._is_legal_shape(shape):
+            # Case: shape is given
             return shape
         else:
-            raise Exception(f"Illegal shape {shape}!")
+            raise Exception(f"Illegal shape {shape}. The argument should be in the format (lower, upper), where lower < upper!")
 
-    def _is_legal_shape(self, shape: Union[int, tuple[int, ...]]) -> bool:
-        if shape == 1 or shape == (1,):
-            # Check if shape has the right format for the default value
-            if isinstance(self._default, int):
-                # Case: default is single dimensional
-                return True
-        elif isinstance(shape, int):
-            # Check if shape has the right format for the default value
-            if isinstance(self._default, np.ndarray) and shape == len(self._default) and self._default.ndim == 1:
-                # Case: default is array-like dimensional
-                return True
-        elif isinstance(shape, tuple) and all(isinstance(s, int) for s in shape):
-            # Check if shape is in the right format for the default value
-            if isinstance(self._default, np.ndarray) and shape == self._default.shape:
-                # Case: default is multidimensional
-                return True
+    def _is_legal_shape(self, shape: tuple[int, ...]) -> bool:
+        if shape == (1,) and isinstance(self._default, (int, np.int_)):
+            # Case: shape and default refers to single dimensional
+            return True
+        elif isinstance(shape, tuple) and all(isinstance(s, (int, np.int_)) for s in shape) and \
+                isinstance(self._default, np.ndarray) and shape == self._default.shape:
+            return True
         return False
 
     def _check_distribution(self, distribution: Union[Distribution, None]) -> Union[Distribution, None]:
         if self._is_legal_distribution(distribution):
             return distribution
         else:
-            raise Exception(f"Illegal distribution {distribution}")
+            raise Exception(f"Illegal distribution {distribution}. The argument should have the class Uniform(...)!")
 
     def _is_legal_distribution(self, distribution: Union[Distribution, None]) -> bool:
         if isinstance(distribution, Uniform):
@@ -496,14 +479,14 @@ class Integer(Continuous):
             sample = random.randint(low=self.lb, high=self.ub, size=sample_size)
             return sample
         else:
-            raise Exception("Unknown Probability Distribution!")
+            raise Exception("Unknown Distribution!")
 
     def valid_configuration(self, value: Any) -> bool:
         if isinstance(value, (list, np.ndarray)):
             # Case: Value is multi-dimensional
             value = np.array(value)
             return np.all((self.lb <= value) & (value < self.ub)) and self._shape == value.shape
-        elif isinstance(value, int):
+        elif isinstance(value, (int, np.int_)):
             # Case: value is single-dimensional
             return self.lb <= value < self.ub
         else:

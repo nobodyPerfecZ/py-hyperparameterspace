@@ -1,7 +1,7 @@
-from typing import Union, Iterable, Any
+from typing import Any, Union
+
 import numpy as np
 
-from PyHyperparameterSpace.dist.abstract_dist import Distribution
 from PyHyperparameterSpace.hp.abstract_hp import Hyperparameter
 
 
@@ -10,7 +10,7 @@ class Constant(Hyperparameter):
     Class to represent a constant hyperparameter, where the given default value does not get changed by the
     sampling procedure.
 
-        Attributes:
+        Args:
             name (str):
                 Name of the hyperparameter
 
@@ -25,7 +25,7 @@ class Constant(Hyperparameter):
             self,
             name: str,
             default: Any,
-            shape: Union[int, tuple[int, ...], None] = None,
+            shape: Union[tuple[int, ...], None] = None,
     ):
         super().__init__(name=name, shape=shape, default=default)
 
@@ -33,43 +33,35 @@ class Constant(Hyperparameter):
         if self._is_legal_default(default):
             return default
         else:
-            raise Exception(f"Illegal default value {default}")
+            raise Exception(f"Illegal default {default}. The argument should be given!")
 
     def _is_legal_default(self, default: Any) -> bool:
         if default is None:
             return False
         return True
 
-    def _check_shape(self, shape: Union[int, tuple[int, ...], None]) -> Union[int, tuple[int, ...]]:
-        if shape is None:
-            # Case: Adjust the shape according to the given default value
-            if isinstance(self._default, (int, float, bool, str)):
-                # Case: default is single dimensional
-                return (1,)
-            elif isinstance(self._default, np.ndarray):
-                # Case: default is multidimensional
-                return self._default.shape
+    def _check_shape(self, shape: Union[tuple[int, ...], None]) -> Union[tuple[int, ...]]:
+        if shape is None and isinstance(self._default, (int, float, bool, str, np.int_, np.float_, np.str_, np.bool_)):
+            # Case: shape is not given and default is single dimensional
+            return 1,
+        elif shape is None and isinstance(self._default, np.ndarray):
+            # Case: shape is not given and default is multidimensional
+            return self._default.shape
         elif self._is_legal_shape(shape):
+            # Case: shape is given and has to be checked
             return shape
         else:
-            raise Exception(f"Illegal shape {shape}!")
+            # Case: shape is not valid
+            raise Exception(f"Illegal shape {shape}. The argument should be given in the format (dim1, ...)!")
 
-    def _is_legal_shape(self, shape: Union[int, tuple[int, ...]]) -> bool:
-        if shape == 1 or shape == (1,):
-            # Case: shape refers to single dimensional
-            if isinstance(self._default, (int, float, bool, str)):
-                # Case: default is single dimensional
-                return True
-        elif isinstance(shape, int):
-            # Case: shape refers to array-like dimensional
-            if isinstance(self._default, np.ndarray) and shape == len(self._default) and self._default.ndim == 1:
-                # Case: default is array-like dimensional
-                return True
-        elif isinstance(shape, tuple) and all(isinstance(s, int) for s in shape):
-            # Case: shape refers to multi-dimensional
-            if isinstance(self._default, np.ndarray) and shape == self._default.shape:
-                # Case: default is multi-dimensional
-                return True
+    def _is_legal_shape(self, shape: tuple[int, ...]) -> bool:
+        if shape == (1,) and isinstance(self._default, (int, float, bool, str, np.int_, np.float_, np.str_, np.bool_)):
+            # Case: shape and default refers to single dimensional
+            return True
+        elif isinstance(shape, tuple) and all(isinstance(s, int) for s in shape) and \
+                isinstance(self._default, np.ndarray) and shape == self._default.shape:
+            # Case: shape and default refers to multidimensional
+            return True
         return False
 
     def sample(self, random: np.random.RandomState, size: Union[int, None] = None) -> Any:

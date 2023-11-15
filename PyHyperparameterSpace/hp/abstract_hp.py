@@ -1,9 +1,7 @@
 from abc import ABC, abstractmethod
-from typing import Union, Iterable, Any
-import numpy as np
+from typing import Any, Iterable, Union
 
-from PyHyperparameterSpace.dist.abstract_dist import Distribution
-from PyHyperparameterSpace.dist.continuous import Normal
+import numpy as np
 
 
 class Hyperparameter(ABC):
@@ -25,7 +23,7 @@ class Hyperparameter(ABC):
             self,
             name: str,
             default: Any = None,
-            shape: Union[int, tuple[int, ...], None] = None,
+            shape: Union[tuple[int, ...], None] = None,
     ):
         if isinstance(default, list):
             default = np.array(default)
@@ -55,10 +53,10 @@ class Hyperparameter(ABC):
         """
         return self._default
 
-    def get_shape(self) -> Union[int, tuple[int, ...], None]:
+    def get_shape(self) -> tuple[int, ...]:
         """
         Returns:
-            Union[int, tuple[int, ...], None]:
+            tuple[int, ...]:
                 Shape of the hyperparameter
         """
         return self._shape
@@ -104,7 +102,7 @@ class Hyperparameter(ABC):
         pass
 
     @abstractmethod
-    def _check_shape(self, shape: Union[int, tuple[int, ...], None]) -> Union[int, tuple[int, ...], None]:
+    def _check_shape(self, shape: Union[tuple[int, ...], None]) -> tuple[int, ...]:
         """
         Checks if the given shape is legal. A shape is called legal if it fulfills the format (...)
             - (dim1, dim2, ...)
@@ -118,13 +116,13 @@ class Hyperparameter(ABC):
                 Shape to check
 
         Returns:
-            Union[int, tuple[int, ...], None]:
+            tuple[int, ...]:
                 Legal shape
         """
         pass
 
     @abstractmethod
-    def _is_legal_shape(self, shape: Union[int, tuple[int, ...], None]) -> bool:
+    def _is_legal_shape(self, shape: tuple[int, ...]) -> bool:
         """
         Returns true if the given shape fulfills the format (...)
             - (dim1, dim2, ...)
@@ -134,7 +132,7 @@ class Hyperparameter(ABC):
         and has the same dimension as the given default value.
 
         Args:
-            shape (Union[int, tuple[int, ...], None]):
+            shape (tuple[int, ...]):
                 Shape to check
 
         Returns:
@@ -206,7 +204,7 @@ class Hyperparameter(ABC):
     def _get_sample_size(
             cls,
             size: Union[int, None] = None,
-            shape: Union[int, tuple[int, ...]] = None,
+            shape: Union[tuple[int, ...], None] = None,
     ) -> Union[int, tuple[int], None]:
         """
         Returns the resulting shape of the sample, according to size and shape.
