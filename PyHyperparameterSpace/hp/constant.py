@@ -27,8 +27,6 @@ class Constant(Hyperparameter):
             default: Any,
             shape: Union[tuple[int, ...], None] = None,
     ):
-        if isinstance(default, list):
-            default = np.array(default)
         super().__init__(name=name, shape=shape, default=default)
 
     def _check_default(self, default: Any) -> Any:

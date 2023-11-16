@@ -36,9 +36,6 @@ class Categorical(Hyperparameter):
         if isinstance(choices, list):
             choices = np.array(choices)
 
-        if isinstance(default, list):
-            default = np.array(default)
-
         # First set the variables
         self._choices = choices
         self._distribution = distribution
