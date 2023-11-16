@@ -28,13 +28,16 @@ class Categorical(Hyperparameter):
     def __init__(
             self,
             name: str,
-            choices: list[Any],
+            choices: Union[list[Any], np.ndarray],
             default: Union[Any, None] = None,
             shape: Union[tuple[int, ...], None] = None,
             distribution: Union[Distribution, None] = None,
     ):
         if isinstance(choices, list):
             choices = np.array(choices)
+
+        if isinstance(default, list):
+            default = np.array(default)
 
         # First set the variables
         self._choices = choices
@@ -46,10 +49,10 @@ class Categorical(Hyperparameter):
         self._choices = self._check_choices(choices)
         self._distribution = self._check_distribution(distribution)
 
-    def get_choices(self) -> list[str]:
+    def get_choices(self) -> np.ndarray:
         """
         Returns:
-            list[str]:
+            np.ndarray:
                 List of choices
         """
         return self._choices
@@ -62,47 +65,44 @@ class Categorical(Hyperparameter):
         """
         return self._distribution
 
-    def _check_choices(self, choices: list[Any]) -> list[Any]:
+    def _check_choices(self, choices: np.ndarray) -> np.ndarray:
         """
         Checks if the given choices are legal. A choice is called legal, if it fulfills the format [item1, item2, ...]
 
         Args:
-            choices (list[Any]):
+            choices (np.ndarray):
                 Choices to check
 
         Returns:
-            list[Any]:
+            np.ndarray:
                 Legal choices
         """
         if self._is_legal_choices(choices):
             return choices
         else:
-            raise Exception(f"Illegal choices {choices}. The argument should be a list or an np.ndarray!")
+            raise Exception(f"Illegal choices {choices}. The argument should be a np.ndarray!")
 
-    def _is_legal_choices(self, choices: Union[list[Any], None]) -> bool:
+    def _is_legal_choices(self, choices: np.ndarray) -> bool:
         """
         Returns True if the given choices fulfills the format [item1, item2, ...].
 
         Args:
-            choices (Union[list[Any], None]):
+            choices (np.ndarray):
                 Choices to check
 
         Returns:
             bool:
                 True, if given choices is legal
         """
-        if isinstance(choices, (list, np.ndarray)) and len(choices) > 1:
-            return True
-        else:
-            return False
+        return isinstance(choices, np.ndarray) and len(choices) > 1
 
     def _check_default(self, default: Union[Any, None]) -> Any:
-        if default is None and self._distribution is not None:
-            # Case: Take the option with the highest probability as default value
-            return self._choices[np.argmax(self._distribution.weights)]
-        elif default is None and self._distribution is None:
+        if default is None and self._distribution is None:
             # Case: Take the first option as default value
             return self._choices[0]
+        elif default is None:
+            # Case: Take the option with the highest probability as default value
+            return self._choices[np.argmax(self._distribution.weights)]
         elif self._is_legal_default(default):
             # Case: default is given and legal
             return default
@@ -110,8 +110,8 @@ class Categorical(Hyperparameter):
             # Case: default is illegal
             raise Exception(f"Illegal default {default}. The argument should be given in choices!")
 
-    def _is_legal_default(self, default: Union[Any, None]) -> bool:
-        if isinstance(default, (list, np.ndarray)):
+    def _is_legal_default(self, default: Any) -> bool:
+        if isinstance(default, np.ndarray):
             # Case: default is a vector/matrix value
             return any(np.array_equal(default, choice) for choice in self._choices)
         else:
@@ -119,13 +119,14 @@ class Categorical(Hyperparameter):
             return default in self._choices
 
     def _check_shape(self, shape: Union[tuple[int, ...], None]) -> tuple[int, ...]:
-        if shape is None and isinstance(self._choices[0], (int, float, bool, str, np.int_, np.float_, np.str_, np.bool_)):
+        if shape is None and \
+                isinstance(self._choices[0], (int, float, bool, str, np.int_, np.float_, np.bool_, np.str_)):
             # Case: shape is not given and values in choices are single dimensional
             return 1,
         elif shape is None and isinstance(self._choices[0], np.ndarray):
             # Case: shape is not given and values in choices are multidimensional
             return self._choices[0].shape
-        elif self._is_legal_shape(shape):
+        elif shape is not None and self._is_legal_shape(shape):
             # Case: shape is given and legal
             return shape
         else:
@@ -133,13 +134,12 @@ class Categorical(Hyperparameter):
             raise Exception(f"Illegal shape {shape}!")
 
     def _is_legal_shape(self, shape: tuple[int, ...]) -> bool:
-        if shape == (1,) and isinstance(self._choices[0], (int, float, bool, str, np.int_, np.float_, np.str_, np.bool_)):
-            # Case: shape and values in choices refers to single dimensional
-            return True
-        elif isinstance(shape, tuple) and all(isinstance(s, int) for s in shape) and \
-                isinstance(self._choices[0], np.ndarray) and shape == self._choices[0].shape:
-            # Case: shape and values in choices refers to multidimensional
-            return True
+        if shape == (1,):
+            # Case: shape refers to single dimensional
+            return isinstance(self._choices[0], (int, float, bool, str, np.int_, np.float_, np.bool_, np.str_))
+        elif isinstance(shape, tuple) and all(isinstance(s, int) for s in shape):
+            # Case: shape refers to multidimensional
+            return isinstance(self._choices[0], np.ndarray) and shape == self._choices[0].shape
         return False
 
     def _check_distribution(self, distribution: Union[Distribution, None]) -> Distribution:
@@ -208,7 +208,7 @@ class Categorical(Hyperparameter):
             raise Exception(f"Unknown Distribution {self._distribution}!")
 
     def valid_configuration(self, value: Any) -> bool:
-        if isinstance(value, (list, np.ndarray)):
+        if isinstance(value, np.ndarray):
             # Case: value is multidimensional
             return any(np.array_equal(value, choice) for choice in self._choices)
         else:
@@ -224,8 +224,13 @@ class Categorical(Hyperparameter):
         return hash(self.__repr__())
 
     def __repr__(self) -> str:
-        text = f"Categorical({self._name}, choices={self._choices}, default={self._default}, shape={self._shape}, distribution={self._distribution})"
-        return text
+        header = f"Categorical({self._name}, "
+        choices = f"choices={self._choices}, "
+        default = f"default={self._default}, "
+        shape = f"shape={self._shape}, "
+        distribution = f"distribution={self._distribution}"
+        end = ")"
+        return "".join([header, choices, default, shape, distribution, end])
 
     def __getstate__(self) -> dict:
         state = super().__getstate__()
@@ -233,7 +238,7 @@ class Categorical(Hyperparameter):
         state["distribution"] = self._distribution
         return state
 
-    def __setstate__(self, state) -> dict:
+    def __setstate__(self, state):
         super().__setstate__(state)
         self._choices = state["choices"]
         self._distribution = state["distribution"]
