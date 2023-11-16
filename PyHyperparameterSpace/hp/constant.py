@@ -17,8 +17,8 @@ class Constant(Hyperparameter):
             default (Any):
                 Default value of the hyperparameter
 
-            shape (tuple[int]):
-                dimensions-space of the hyperparameter
+            shape (Union[tuple[int, ...], None]):
+                Dimensions-space of the hyperparameter
     """
 
     def __init__(
@@ -27,6 +27,8 @@ class Constant(Hyperparameter):
             default: Any,
             shape: Union[tuple[int, ...], None] = None,
     ):
+        if isinstance(default, list):
+            default = np.array(default)
         super().__init__(name=name, shape=shape, default=default)
 
     def _check_default(self, default: Any) -> Any:
@@ -36,18 +38,16 @@ class Constant(Hyperparameter):
             raise Exception(f"Illegal default {default}. The argument should be given!")
 
     def _is_legal_default(self, default: Any) -> bool:
-        if default is None:
-            return False
-        return True
+        return default is not None
 
-    def _check_shape(self, shape: Union[tuple[int, ...], None]) -> Union[tuple[int, ...]]:
+    def _check_shape(self, shape: Union[tuple[int, ...], None]) -> tuple[int, ...]:
         if shape is None and isinstance(self._default, (int, float, bool, str, np.int_, np.float_, np.str_, np.bool_)):
             # Case: shape is not given and default is single dimensional
             return 1,
         elif shape is None and isinstance(self._default, np.ndarray):
             # Case: shape is not given and default is multidimensional
             return self._default.shape
-        elif self._is_legal_shape(shape):
+        elif shape is not None and self._is_legal_shape(shape):
             # Case: shape is given and has to be checked
             return shape
         else:
@@ -55,13 +55,12 @@ class Constant(Hyperparameter):
             raise Exception(f"Illegal shape {shape}. The argument should be given in the format (dim1, ...)!")
 
     def _is_legal_shape(self, shape: tuple[int, ...]) -> bool:
-        if shape == (1,) and isinstance(self._default, (int, float, bool, str, np.int_, np.float_, np.str_, np.bool_)):
-            # Case: shape and default refers to single dimensional
-            return True
-        elif isinstance(shape, tuple) and all(isinstance(s, int) for s in shape) and \
-                isinstance(self._default, np.ndarray) and shape == self._default.shape:
-            # Case: shape and default refers to multidimensional
-            return True
+        if shape == (1,):
+            # Case: shape refers to single dimensional
+            return isinstance(self._default, (int, float, bool, str, np.int_, np.float_, np.bool_, np.str_))
+        elif isinstance(shape, tuple) and all(isinstance(s, int) for s in shape):
+            # Case: shape refers to multidimensional
+            return isinstance(self._default, np.ndarray) and shape == self._default.shape
         return False
 
     def sample(self, random: np.random.RandomState, size: Union[int, None] = None) -> Any:
@@ -72,7 +71,7 @@ class Constant(Hyperparameter):
             return np.full(shape=sample_size, fill_value=self._default)
 
     def valid_configuration(self, value: Any) -> bool:
-        if isinstance(value, (list, np.ndarray)):
+        if isinstance(value, np.ndarray):
             # Case: value is multi-dimensional
             return np.array_equal(self._default, value)
         else:
@@ -88,5 +87,8 @@ class Constant(Hyperparameter):
         return hash(self.__repr__())
 
     def __repr__(self) -> str:
-        text = f"Constant({self._name}, default={self._default}, shape={self._shape})"
-        return text
+        header = f"Constant({self._name}, "
+        default = f"default={self._default}, "
+        shape = f"shape={self._shape}"
+        end = ")"
+        return "".join([header, default, shape, end])
